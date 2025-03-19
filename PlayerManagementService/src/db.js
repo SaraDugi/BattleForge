@@ -16,14 +16,16 @@ const db = mysql.createPool({
   },
 });
 
-(async () => {
-  try {
-    const connection = await db.getConnection();
-    console.log('Database connected successfully');
-    connection.release();
-  } catch (error) {
-    console.error('Database connection failed:', error);
-  }
-})();
+if (require.main === module) {
+  (async () => {
+    try {
+      const connection = await db.getConnection();
+      console.log('Database connected successfully');
+      connection.release();
+    } catch (error) {
+      console.error('Database connection failed:', error);
+    }
+  })();
+}
 
 module.exports = db;

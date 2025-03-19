@@ -1,7 +1,6 @@
 const db = require('./db');
 
 const Player = {
-
   create: async (data) => {
     try {
       const {
@@ -233,4 +232,5 @@ const Player = {
     }
   }
 };
+
 module.exports = Player;

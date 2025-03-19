@@ -1,7 +1,4 @@
 const Player = require('./player');
-const db = require('./db');       
-const bcrypt = require('bcrypt'); 
-const jwt = require('jsonwebtoken'); 
 
 exports.createPlayer = async (req, res) => {
   const {
@@ -65,69 +62,38 @@ exports.patchAddAchievement = async (req, res) => {
   }
 };
 
-exports.getPlayers = async (req, res) => {
+exports.findPlayers = async (req, res) => {
+  const { id, nickname, score, main_faction } = req.query;
   try {
-    const players = await Player.getAll();
-    res.status(200).json(players);
-  } catch (error) {
-    console.error("Error fetching players:", error.message);
-    res.status(500).json({ message: "Failed to retrieve players" });
-  }
-};
-
-exports.getPlayerById = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const player = await Player.getById(id);
-    if (!player) {
-      return res.status(404).json({ message: "Player not found" });
+    let result;
+    if (id) {
+      const player = await Player.getById(id);
+      if (!player) {
+        return res.status(404).json({ message: 'Player not found' });
+      }
+      result = [player];
+    } else if (nickname) {
+      result = await Player.getByNickname(nickname);
+      if (!result.length) {
+        return res.status(404).json({ message: 'No players found with that nickname' });
+      }
+    } else if (score) {
+      result = await Player.getByScore(score);
+      if (!result.length) {
+        return res.status(404).json({ message: 'No players found with that score' });
+      }
+    } else if (main_faction) {
+      result = await Player.getByMainFaction(main_faction);
+      if (!result.length) {
+        return res.status(404).json({ message: 'No players found for that main faction' });
+      }
+    } else {
+      result = await Player.getAll();
     }
-    res.status(200).json(player);
+    res.status(200).json(result);
   } catch (error) {
-    console.error("Error fetching player by ID:", error.message);
-    res.status(500).json({ message: "Failed to retrieve player" });
-  }
-};
-
-exports.getPlayersByScore = async (req, res) => {
-  const { score } = req.params;
-  try {
-    const players = await Player.getByScore(score);
-    if (!players.length) {
-      return res.status(404).json({ message: "No players found with that score" });
-    }
-    res.status(200).json(players);
-  } catch (error) {
-    console.error("Error fetching players by score:", error.message);
-    res.status(500).json({ message: "Failed to retrieve players by score" });
-  }
-};
-
-exports.getPlayersByNickname = async (req, res) => {
-  const { nickname } = req.params;
-  try {
-    const players = await Player.getByNickname(nickname);
-    if (!players.length) {
-      return res.status(404).json({ message: "No players found with that nickname" });
-    }
-    res.status(200).json(players);
-  } catch (error) {
-    console.error("Error fetching players by nickname:", error.message);
-    res.status(500).json({ message: "Failed to retrieve players by nickname" });
-  }
-};
-
-exports.getPlayersByMainFaction = async (req, res) => {
-  const { mainFaction } = req.params;
-  try {
-    const players = await Player.getByMainFaction(mainFaction);
-    if (!players.length) {
-      return res.status(404).json({ message: "No players found for that main faction" });
-    }
-    res.status(200).json(players);
-  } catch (error) {
-    console.error("Error fetching players by main faction:", error.message);
-    res.status(500).json({ message: "Failed to retrieve players by main faction" });
+    console.error('Error fetching players:', error.message);
+    res.status(500).json({ message: 'Failed to retrieve players' });
   }
 };
 
