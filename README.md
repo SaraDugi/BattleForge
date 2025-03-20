@@ -9,14 +9,6 @@
 - **Simulacijo bitk:** Izračun in beleženje rezultatov bitk na osnovi predpisanih pravil in naključnih elementov.
 - **Spletni vmesnik:** Spletna aplikacija, preko katere uporabniki komunicirajo z vsemi mikrostoritvami.
 
-## Arhitektura sistema
-
-Sistem temelji na načelih **čiste arhitekture** in **screaming architecture**, kar pomeni:
-
-- **Neodvisnost domene:** Poslovna logika (npr. pravila bitk, upravljanje igralcev) je popolnoma ločena od infrastrukture (podatkovne baze, API-ji).
-- **Ohlapna sklopljenost:** Vsaka mikrostoritev deluje kot samostojna enota in komunicira prek jasno definiranih API-jev.
-- **Smer odvisnosti:** Zunanje plasti (infrastructure) se povezujejo z notranjimi (domain), pri čemer se ne delijo odvisnosti obratno.
-
 ## Mikrostoritve
 
 ### 1. **BattleService**  

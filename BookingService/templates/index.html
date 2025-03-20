@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Booking Service</title>
+  <script>
+    // Set jwtToken manually with your existing JWT from another service.
+    let jwtToken = "";
+
+    function reserveTable() {
+      const player = document.getElementById("player").value;
+      const num_players = parseInt(document.getElementById("num_players").value);
+      const start_time = document.getElementById("start_time").value;
+      const duration = parseInt(document.getElementById("duration").value);
+
+      fetch("/booking/reserve", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + jwtToken
+        },
+        body: JSON.stringify({player, num_players, start_time, duration})
+      })
+      .then(res => {
+        if (!res.ok) { throw new Error("Reservation failed"); }
+        return res.json();
+      })
+      .then(data => { 
+          document.getElementById("reservationStatus").innerText = 
+            "Reservation created with ID: " + data.id;
+      })
+      .catch(err => { 
+          document.getElementById("reservationStatus").innerText = "Reservation failed.";
+          console.error(err);
+      });
+    }
+  </script>
+</head>
+<body>
+  <h1>Booking Service</h1>
+  
+  <div style="border: 1px solid #ccc; padding: 10px; margin: 10px;">
+    <h2>Create Reservation</h2>
+    <p><em>Note:</em> Set <code>jwtToken</code> in the JavaScript code or use Postman/Swagger UI with your JWT.</p>
+    <label>Player:</label>
+    <input type="text" id="player" placeholder="Player Name"><br><br>
+    <label>Number of Players:</label>
+    <input type="number" id="num_players" placeholder="e.g. 4"><br><br>
+    <label>Start Time (ISO format):</label>
+    <input type="text" id="start_time" placeholder="2025-03-20T15:30:00"><br><br>
+    <label>Duration (minutes):</label>
+    <input type="number" id="duration" placeholder="e.g. 90"><br><br>
+    <button onclick="reserveTable()">Reserve Table</button>
+    <p id="reservationStatus"></p>
+  </div>
+  
+  <p>Use Postman/Swagger UI or set jwtToken in code to pass an existing JWT from another service.</p>
+</body>
+</html>

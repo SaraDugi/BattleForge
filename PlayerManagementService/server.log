@@ -27,3 +27,6 @@
 {"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-19T18:20:29.822Z"}
 {"level":"info","message":"Full API URL for players: http://localhost:5000/players","timestamp":"2025-03-19T18:20:29.830Z"}
 {"level":"info","message":"Swagger UI available at http://localhost:5000/api-docs","timestamp":"2025-03-19T18:20:29.830Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-20T10:54:36.617Z"}
+{"level":"info","message":"Full API URL for players: http://localhost:5000/players","timestamp":"2025-03-20T10:54:36.625Z"}
+{"level":"info","message":"Swagger UI available at http://localhost:5000/api-docs","timestamp":"2025-03-20T10:54:36.625Z"}
