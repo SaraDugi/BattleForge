@@ -1,4 +1,4 @@
-name: Build and Test All Services
+name: Build and Test Player Management Services
 
 on:
   push:
