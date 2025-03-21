@@ -1,122 +1,47 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const playerRoutes = require('./playerRoutes');
-const winston = require('winston');
-const swaggerJsDoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+require('dotenv').config();
+const grpc = require('@grpc/grpc-js');
+const protoLoader = require('@grpc/proto-loader');
+const path = require('path');
+const logger = require('./logger');
+const playerService = require('./playerService'); 
 
-dotenv.config();
-
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: 'server.log' })
-  ]
+const PROTO_PATH = path.join(__dirname, 'protos', 'player.proto');
+const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true,
 });
+const playerProto = grpc.loadPackageDefinition(packageDefinition).player;
 
-const app = express();
+function main() {
+  const server = new grpc.Server();
 
-app.use(cors({
-  origin: 'http://localhost:3000', 
-  credentials: true
-}));
-app.use(express.json());
+  server.addService(playerProto.PlayerService.service, {
+    FindPlayers: playerService.FindPlayers,
+    CreatePlayer: playerService.CreatePlayer,
+    AddAchievement: playerService.AddAchievement,
+    DeletePlayerById: playerService.DeletePlayerById,
+    UpdateProfile: playerService.UpdateProfile,
+    UpdateEmail: playerService.UpdateEmail,
+    UpdatePassword: playerService.UpdatePassword,
+    UpdateScore: playerService.UpdateScore,
+    UpdateStats: playerService.UpdateStats,
+    UpdateMainFaction: playerService.UpdateMainFaction,
+    UpdateMedia: playerService.UpdateMedia,
+    Login: playerService.Login
+  });
 
-const PORT = process.env.PORT || 5000;
-const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
+  const address = '0.0.0.0:5000';
+  server.bindAsync(address, grpc.ServerCredentials.createInsecure(), (err, port) => {
+    if (err) {
+      logger.error(`Error binding server: ${err.message}`);
+      return;
+    }
+    logger.info(`gRPC server running at ${address}`);
+    server.start();
+  });
+}
 
-const swaggerOptions = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Player Management API',
-      version: '1.0.0',
-      description: 'API for managing players',
-    },
-    servers: [{
-      url: `http://localhost:${PORT}`,
-    }],
-  },
-  apis: ['./src/playerRoutes.js'],
-};
-
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
-/**
- * @swagger
- * /generate-token:
- *   get:
- *     summary: Generate a test JWT token
- *     description: Returns a sample JWT token for testing.
- *     responses:
- *       200:
- *         description: JWT token generated successfully
- */
-app.get('/generate-token', (req, res) => {
-  const token = jwt.sign({ user: 'testUser' }, SECRET_KEY, { expiresIn: '1h' });
-  res.json({ token });
-});
-
-/**
- * @swagger
- * /login:
- *   post:
- *     summary: Login a user
- *     description: Authenticates a user and returns a JWT token.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       200:
- *         description: Login successful, returns JWT token
- *       401:
- *         description: Invalid credentials
- */
-app.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  
-  const mockUser = {
-    email: 'test@example.com',
-    passwordHash: await bcrypt.hash('password123', 10),
-  };
-
-  if (email !== mockUser.email) {
-    return res.status(401).json({ message: 'Invalid credentials' });
-  }
-
-  const isPasswordValid = await bcrypt.compare(password, mockUser.passwordHash);
-  if (!isPasswordValid) {
-    return res.status(401).json({ message: 'Invalid credentials' });
-  }
-
-  const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: '1h' });
-  res.json({ token });
-});
-
-app.use('/players', playerRoutes);
-
-app.listen(PORT, () => {
-  const baseUrl = `http://localhost:${PORT}`;
-  logger.info(`Server is running on port ${PORT}`);
-  logger.info(`Full API URL for players: ${baseUrl}/players`);
-  logger.info(`Swagger UI available at ${baseUrl}/api-docs`);
-});
-
-module.exports = app;
+main();

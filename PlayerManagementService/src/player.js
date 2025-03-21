@@ -1,4 +1,5 @@
 const db = require('./db');
+const logger = require('./logger');
 
 const Player = {
   create: async (data) => {
@@ -47,8 +48,8 @@ const Player = {
       ]);
       return result.insertId;
     } catch (error) {
-      console.error('Error creating player:', error.message);
-      throw new Error('Database error');
+      logger.error(`Error creating player (detailed): ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
     }
   },
 
@@ -62,8 +63,8 @@ const Player = {
       );
       return result.affectedRows;
     } catch (error) {
-      console.error('Error adding achievement:', error.message);
-      throw new Error('Database error');
+      logger.error(`Error adding achievement (detailed): ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
     }
   },
 
@@ -72,75 +73,61 @@ const Player = {
       const [rows] = await db.query('SELECT * FROM player');
       return rows;
     } catch (error) {
-      console.error('Error fetching players:', error.message);
-      throw new Error('Database error');
+      logger.error(`Error fetching players (detailed): ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
     }
   },
-
+  
   getById: async (id) => {
     try {
-      const [rows] = await db.query(
-        'SELECT * FROM player WHERE id = ?',
-        [id]
-      );
+      const [rows] = await db.query('SELECT * FROM player WHERE id = ?', [id]);
       return rows[0];
     } catch (error) {
-      console.error('Error fetching player by ID:', error.message);
-      throw new Error('Database error');
+      logger.error(`Error fetching player by ID=${id}: ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
     }
   },
 
   getByScore: async (score) => {
     try {
-      const [rows] = await db.query(
-        'SELECT * FROM player WHERE score = ?',
-        [score]
-      );
+      const [rows] = await db.query('SELECT * FROM player WHERE score = ?', [score]);
       return rows;
     } catch (error) {
-      console.error('Error fetching players by score:', error.message);
-      throw new Error('Database error');
+      logger.error(`Error fetching players by score=${score}: ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
     }
   },
 
   getByNickname: async (nickname) => {
     try {
-      const [rows] = await db.query(
-        'SELECT * FROM player WHERE nickname = ?',
-        [nickname]
-      );
+      const [rows] = await db.query('SELECT * FROM player WHERE nickname = ?', [nickname]);
       return rows;
     } catch (error) {
-      console.error('Error fetching players by nickname:', error.message);
-      throw new Error('Database error');
+      logger.error(`Error fetching players by nickname=${nickname}: ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
     }
   },
 
   getByMainFaction: async (mainFaction) => {
     try {
-      const [rows] = await db.query(
-        'SELECT * FROM player WHERE main_faction = ?',
-        [mainFaction]
-      );
+      const [rows] = await db.query('SELECT * FROM player WHERE main_faction = ?', [mainFaction]);
       return rows;
     } catch (error) {
-      console.error('Error fetching players by main faction:', error.message);
-      throw new Error('Database error');
+      logger.error(`Error fetching players by main faction=${mainFaction}: ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
     }
   },
 
   deleteById: async (id) => {
     try {
-      const [result] = await db.query(
-        'DELETE FROM player WHERE id = ?',
-        [id]
-      );
+      const [result] = await db.query('DELETE FROM player WHERE id = ?', [id]);
       return result.affectedRows;
     } catch (error) {
-      console.error('Error deleting player by ID:', error.message);
-      throw new Error('Database error');
+      logger.error(`Error deleting player by ID=${id}: ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
     }
   },
+
   updateProfile: async (id, first_name, last_name, nickname) => {
     try {
       const [result] = await db.query(
@@ -149,8 +136,8 @@ const Player = {
       );
       return result.affectedRows;
     } catch (error) {
-      console.error('Error updating profile:', error.message);
-      throw new Error('Database error');
+      logger.error(`Error updating profile for ID=${id}: ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
     }
   },
 
@@ -162,8 +149,8 @@ const Player = {
       );
       return result.affectedRows;
     } catch (error) {
-      console.error('Error updating email:', error.message);
-      throw new Error('Database error');
+      logger.error(`Error updating email for ID=${id}: ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
     }
   },
 
@@ -175,8 +162,8 @@ const Player = {
       );
       return result.affectedRows;
     } catch (error) {
-      console.error('Error updating password:', error.message);
-      throw new Error('Database error');
+      logger.error(`Error updating password for ID=${id}: ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
     }
   },
 
@@ -188,8 +175,8 @@ const Player = {
       );
       return result.affectedRows;
     } catch (error) {
-      console.error('Error updating score:', error.message);
-      throw new Error('Database error');
+      logger.error(`Error updating score for ID=${id}: ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
     }
   },
 
@@ -201,8 +188,8 @@ const Player = {
       );
       return result.affectedRows;
     } catch (error) {
-      console.error('Error updating stats:', error.message);
-      throw new Error('Database error');
+      logger.error(`Error updating stats for ID=${id}: ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
     }
   },
 
@@ -214,8 +201,8 @@ const Player = {
       );
       return result.affectedRows;
     } catch (error) {
-      console.error('Error updating main faction:', error.message);
-      throw new Error('Database error');
+      logger.error(`Error updating main faction for ID=${id}: ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
     }
   },
 
@@ -227,10 +214,20 @@ const Player = {
       );
       return result.affectedRows;
     } catch (error) {
-      console.error('Error updating media:', error.message);
-      throw new Error('Database error');
+      logger.error(`Error updating media for ID=${id}: ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
     }
-  }
+  },
+
+  getByEmail: async (email) => {
+    try {
+      const [rows] = await db.query('SELECT * FROM player WHERE email = ?', [email]);
+      return rows[0];
+    } catch (error) {
+      logger.error(`Error fetching player by email=${email}: ${error.message}`, { stack: error.stack });
+      throw new Error(`Database error: ${error.message}`);
+    }
+  },
 };
 
 module.exports = Player;

@@ -1,32 +1,84 @@
-{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-17T13:04:51.286Z"}
-{"level":"info","message":"Full API URL for players: http://localhost:5000/players","timestamp":"2025-03-17T13:04:51.301Z"}
-{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-17T13:20:16.070Z"}
-{"level":"info","message":"Full API URL for players: http://localhost:5000/players","timestamp":"2025-03-17T13:20:16.075Z"}
-{"level":"info","message":"Swagger UI available at http://localhost:5000/api-docs","timestamp":"2025-03-17T13:20:16.076Z"}
-{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-17T13:22:34.602Z"}
-{"level":"info","message":"Full API URL for players: http://localhost:5000/players","timestamp":"2025-03-17T13:22:34.606Z"}
-{"level":"info","message":"Swagger UI available at http://localhost:5000/api-docs","timestamp":"2025-03-17T13:22:34.606Z"}
-{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-17T13:29:17.185Z"}
-{"level":"info","message":"Full API URL for players: http://localhost:5000/players","timestamp":"2025-03-17T13:29:17.196Z"}
-{"level":"info","message":"Swagger UI available at http://localhost:5000/api-docs","timestamp":"2025-03-17T13:29:17.197Z"}
-{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-17T14:11:57.532Z"}
-{"level":"info","message":"Full API URL for players: http://localhost:5000/players","timestamp":"2025-03-17T14:11:57.541Z"}
-{"level":"info","message":"Swagger UI available at http://localhost:5000/api-docs","timestamp":"2025-03-17T14:11:57.541Z"}
-{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-19T17:49:00.993Z"}
-{"level":"info","message":"Full API URL for players: http://localhost:5000/players","timestamp":"2025-03-19T17:49:01.003Z"}
-{"level":"info","message":"Swagger UI available at http://localhost:5000/api-docs","timestamp":"2025-03-19T17:49:01.004Z"}
-{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-19T17:59:45.311Z"}
-{"level":"info","message":"Full API URL for players: http://localhost:5000/players","timestamp":"2025-03-19T17:59:45.314Z"}
-{"level":"info","message":"Swagger UI available at http://localhost:5000/api-docs","timestamp":"2025-03-19T17:59:45.314Z"}
-{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-19T18:09:21.365Z"}
-{"level":"info","message":"Full API URL for players: http://localhost:5000/players","timestamp":"2025-03-19T18:09:21.369Z"}
-{"level":"info","message":"Swagger UI available at http://localhost:5000/api-docs","timestamp":"2025-03-19T18:09:21.369Z"}
-{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-19T18:15:29.609Z"}
-{"level":"info","message":"Full API URL for players: http://localhost:5000/players","timestamp":"2025-03-19T18:15:29.615Z"}
-{"level":"info","message":"Swagger UI available at http://localhost:5000/api-docs","timestamp":"2025-03-19T18:15:29.615Z"}
-{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-19T18:20:29.822Z"}
-{"level":"info","message":"Full API URL for players: http://localhost:5000/players","timestamp":"2025-03-19T18:20:29.830Z"}
-{"level":"info","message":"Swagger UI available at http://localhost:5000/api-docs","timestamp":"2025-03-19T18:20:29.830Z"}
-{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-20T10:54:36.617Z"}
-{"level":"info","message":"Full API URL for players: http://localhost:5000/players","timestamp":"2025-03-20T10:54:36.625Z"}
-{"level":"info","message":"Swagger UI available at http://localhost:5000/api-docs","timestamp":"2025-03-20T10:54:36.625Z"}
+{"level":"info","message":"FindPlayers: returning 1 player(s)","timestamp":"2025-03-21T19:21:07.829Z"}
+{"level":"warn","message":"FindPlayers: no player with id=999","timestamp":"2025-03-21T19:21:07.836Z"}
+{"level":"error","message":"Error fetching players: DB error","timestamp":"2025-03-21T19:21:07.839Z"}
+{"level":"info","message":"CreatePlayer: new player ID=101","timestamp":"2025-03-21T19:21:07.842Z"}
+{"level":"error","message":"Error creating player: DB error","timestamp":"2025-03-21T19:21:07.844Z"}
+{"level":"info","message":"AddAchievement: added achievement to player id=10","timestamp":"2025-03-21T19:21:07.846Z"}
+{"level":"error","message":"Error adding achievement: Invalid token","timestamp":"2025-03-21T19:21:07.850Z"}
+{"level":"warn","message":"AddAchievement: player not found for id=999","timestamp":"2025-03-21T19:21:07.853Z"}
+{"level":"info","message":"DeletePlayerById: player id=22 deleted","timestamp":"2025-03-21T19:21:07.855Z"}
+{"level":"warn","message":"DeletePlayerById: no player with id=999","timestamp":"2025-03-21T19:21:07.857Z"}
+{"level":"info","message":"UpdateProfile: updated player id=123","timestamp":"2025-03-21T19:21:07.859Z"}
+{"level":"warn","message":"UpdateProfile: no changes for id=123","timestamp":"2025-03-21T19:21:07.861Z"}
+{"level":"info","message":"UpdateEmail: updated email for player id=1","timestamp":"2025-03-21T19:21:07.863Z"}
+{"level":"info","message":"UpdatePassword: updated password for player id=7","timestamp":"2025-03-21T19:21:07.865Z"}
+{"level":"info","message":"UpdateScore: updated score for player id=10","timestamp":"2025-03-21T19:21:07.869Z"}
+{"level":"info","message":"UpdateStats: updated stats for player id=33","timestamp":"2025-03-21T19:21:07.870Z"}
+{"level":"info","message":"UpdateMainFaction: updated main faction for id=88","timestamp":"2025-03-21T19:21:07.872Z"}
+{"level":"info","message":"UpdateMedia: updated media for player id=50","timestamp":"2025-03-21T19:21:07.873Z"}
+{"level":"info","message":"Login: user id=99 logged in","timestamp":"2025-03-21T19:21:07.881Z"}
+{"level":"warn","message":"Login: no user found for email=doesnot@exist.com","timestamp":"2025-03-21T19:21:07.884Z"}
+{"level":"warn","message":"Login: invalid password for email=test@example.com","timestamp":"2025-03-21T19:21:07.904Z"}
+{"level":"info","message":"FindPlayers: returning 1 player(s)","timestamp":"2025-03-21T19:48:27.301Z"}
+{"level":"warn","message":"FindPlayers: no player with id=999","timestamp":"2025-03-21T19:48:27.308Z"}
+{"level":"error","message":"Error fetching players: DB error","timestamp":"2025-03-21T19:48:27.311Z"}
+{"level":"info","message":"CreatePlayer: new player ID=101","timestamp":"2025-03-21T19:48:27.314Z"}
+{"level":"error","message":"Error creating player: DB error","timestamp":"2025-03-21T19:48:27.316Z"}
+{"level":"info","message":"AddAchievement: added achievement to player id=10","timestamp":"2025-03-21T19:48:27.318Z"}
+{"level":"error","message":"Error adding achievement: Invalid token","timestamp":"2025-03-21T19:48:27.320Z"}
+{"level":"warn","message":"AddAchievement: player not found for id=999","timestamp":"2025-03-21T19:48:27.322Z"}
+{"level":"info","message":"DeletePlayerById: player id=22 deleted","timestamp":"2025-03-21T19:48:27.323Z"}
+{"level":"warn","message":"DeletePlayerById: no player with id=999","timestamp":"2025-03-21T19:48:27.326Z"}
+{"level":"info","message":"UpdateProfile: updated player id=123","timestamp":"2025-03-21T19:48:27.328Z"}
+{"level":"warn","message":"UpdateProfile: no changes for id=123","timestamp":"2025-03-21T19:48:27.330Z"}
+{"level":"info","message":"UpdateEmail: updated email for player id=1","timestamp":"2025-03-21T19:48:27.333Z"}
+{"level":"info","message":"UpdatePassword: updated password for player id=7","timestamp":"2025-03-21T19:48:27.335Z"}
+{"level":"info","message":"UpdateScore: updated score for player id=10","timestamp":"2025-03-21T19:48:27.336Z"}
+{"level":"info","message":"UpdateStats: updated stats for player id=33","timestamp":"2025-03-21T19:48:27.338Z"}
+{"level":"info","message":"UpdateMainFaction: updated main faction for id=88","timestamp":"2025-03-21T19:48:27.339Z"}
+{"level":"info","message":"UpdateMedia: updated media for player id=50","timestamp":"2025-03-21T19:48:27.341Z"}
+{"level":"info","message":"Login: user id=99 logged in","timestamp":"2025-03-21T19:48:27.349Z"}
+{"level":"warn","message":"Login: no user found for email=doesnot@exist.com","timestamp":"2025-03-21T19:48:27.355Z"}
+{"level":"warn","message":"Login: invalid password for email=test@example.com","timestamp":"2025-03-21T19:48:27.373Z"}
+{"level":"info","message":"FindPlayers: returning 1 player(s)","timestamp":"2025-03-21T19:48:48.308Z"}
+{"level":"warn","message":"FindPlayers: no player with id=999","timestamp":"2025-03-21T19:48:48.323Z"}
+{"level":"error","message":"Error fetching players: DB error","timestamp":"2025-03-21T19:48:48.327Z"}
+{"level":"info","message":"CreatePlayer: new player ID=101","timestamp":"2025-03-21T19:48:48.332Z"}
+{"level":"error","message":"Error creating player: DB error","timestamp":"2025-03-21T19:48:48.337Z"}
+{"level":"info","message":"AddAchievement: added achievement to player id=10","timestamp":"2025-03-21T19:48:48.340Z"}
+{"level":"error","message":"Error adding achievement: Invalid token","timestamp":"2025-03-21T19:48:48.344Z"}
+{"level":"warn","message":"AddAchievement: player not found for id=999","timestamp":"2025-03-21T19:48:48.354Z"}
+{"level":"info","message":"DeletePlayerById: player id=22 deleted","timestamp":"2025-03-21T19:48:48.360Z"}
+{"level":"warn","message":"DeletePlayerById: no player with id=999","timestamp":"2025-03-21T19:48:48.366Z"}
+{"level":"info","message":"UpdateProfile: updated player id=123","timestamp":"2025-03-21T19:48:48.371Z"}
+{"level":"warn","message":"UpdateProfile: no changes for id=123","timestamp":"2025-03-21T19:48:48.375Z"}
+{"level":"info","message":"UpdateEmail: updated email for player id=1","timestamp":"2025-03-21T19:48:48.383Z"}
+{"level":"info","message":"UpdatePassword: updated password for player id=7","timestamp":"2025-03-21T19:48:48.387Z"}
+{"level":"info","message":"UpdateScore: updated score for player id=10","timestamp":"2025-03-21T19:48:48.393Z"}
+{"level":"info","message":"UpdateStats: updated stats for player id=33","timestamp":"2025-03-21T19:48:48.396Z"}
+{"level":"info","message":"UpdateMainFaction: updated main faction for id=88","timestamp":"2025-03-21T19:48:48.403Z"}
+{"level":"info","message":"UpdateMedia: updated media for player id=50","timestamp":"2025-03-21T19:48:48.406Z"}
+{"level":"info","message":"Login: user id=99 logged in","timestamp":"2025-03-21T19:48:48.426Z"}
+{"level":"warn","message":"Login: no user found for email=doesnot@exist.com","timestamp":"2025-03-21T19:48:48.432Z"}
+{"level":"warn","message":"Login: invalid password for email=test@example.com","timestamp":"2025-03-21T19:48:48.473Z"}
+{"level":"info","message":"FindPlayers: returning 1 player(s)","timestamp":"2025-03-21T20:11:44.261Z"}
+{"level":"warn","message":"FindPlayers: no player with id=999","timestamp":"2025-03-21T20:11:44.268Z"}
+{"level":"error","message":"Error fetching players: DB error","timestamp":"2025-03-21T20:11:44.271Z"}
+{"level":"info","message":"CreatePlayer: new player ID=101","timestamp":"2025-03-21T20:11:44.273Z"}
+{"level":"error","message":"Error creating player: DB error","timestamp":"2025-03-21T20:11:44.276Z"}
+{"level":"info","message":"AddAchievement: added achievement to player id=10","timestamp":"2025-03-21T20:11:44.280Z"}
+{"level":"error","message":"Error adding achievement: Invalid token","timestamp":"2025-03-21T20:11:44.283Z"}
+{"level":"warn","message":"AddAchievement: player not found for id=999","timestamp":"2025-03-21T20:11:44.286Z"}
+{"level":"info","message":"DeletePlayerById: player id=22 deleted","timestamp":"2025-03-21T20:11:44.289Z"}
+{"level":"warn","message":"DeletePlayerById: no player with id=999","timestamp":"2025-03-21T20:11:44.293Z"}
+{"level":"info","message":"UpdateProfile: updated player id=123","timestamp":"2025-03-21T20:11:44.295Z"}
+{"level":"warn","message":"UpdateProfile: no changes for id=123","timestamp":"2025-03-21T20:11:44.296Z"}
+{"level":"info","message":"UpdateEmail: updated email for player id=1","timestamp":"2025-03-21T20:11:44.299Z"}
+{"level":"info","message":"UpdatePassword: updated password for player id=7","timestamp":"2025-03-21T20:11:44.302Z"}
+{"level":"info","message":"UpdateScore: updated score for player id=10","timestamp":"2025-03-21T20:11:44.304Z"}
+{"level":"info","message":"UpdateStats: updated stats for player id=33","timestamp":"2025-03-21T20:11:44.306Z"}
+{"level":"info","message":"UpdateMainFaction: updated main faction for id=88","timestamp":"2025-03-21T20:11:44.310Z"}
+{"level":"info","message":"UpdateMedia: updated media for player id=50","timestamp":"2025-03-21T20:11:44.313Z"}
+{"level":"info","message":"Login: user id=99 logged in","timestamp":"2025-03-21T20:11:44.327Z"}
+{"level":"warn","message":"Login: no user found for email=doesnot@exist.com","timestamp":"2025-03-21T20:11:44.329Z"}
+{"level":"warn","message":"Login: invalid password for email=test@example.com","timestamp":"2025-03-21T20:11:44.340Z"}

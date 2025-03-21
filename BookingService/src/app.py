@@ -1,9 +1,10 @@
-from flask import Flask
+from flask import Flask, render_template
 from flasgger import Swagger
 from flask_jwt_extended import JWTManager
 from routes import bp as booking_bp
 from config import JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRES
 from db import test_connection
+from logger_config import logger
 
 app = Flask(__name__)
 app.register_blueprint(booking_bp)
@@ -37,6 +38,6 @@ jwt = JWTManager(app)
 if __name__ == '__main__':
     test_connection()
     port = 5050
-    print(f"Starting BookingService on http://localhost:{port}")
-    print(f"Swagger docs available at http://localhost:{port}/apidocs")
+    logger.info(f"Starting BookingService on http://localhost:{port}")
+    logger.info(f"Swagger docs available at http://localhost:{port}/apidocs")
     app.run(debug=True, port=port)
