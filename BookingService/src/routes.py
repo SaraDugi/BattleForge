@@ -8,19 +8,10 @@ bp = Blueprint('booking', __name__)
 def generate_id():
     return str(uuid4())
 
-# ---------------------------------------------------
-# General Routes
-# ---------------------------------------------------
-
 @bp.route('/')
 def index():
     return render_template("index.html")
 
-# ===================================================
-# Reservations Endpoints
-# ===================================================
-
-# ----- GET Endpoints -----
 @bp.route('/booking/reservations', methods=['GET'])
 def get_reservations():
     """
@@ -161,7 +152,6 @@ def get_reservations_by_table(table_assigned):
         if conn.is_connected():
             conn.close()
 
-# ----- POST Endpoints -----
 @bp.route('/booking/reservations', methods=['POST'])
 def create_reservation():
     """
@@ -216,7 +206,6 @@ def create_reservation():
         if conn.is_connected():
             conn.close()
 
-# ----- PUT Endpoints -----
 @bp.route('/booking/reservations/<reservation_id>', methods=['PUT'])
 def update_reservation(reservation_id):
     """
@@ -277,7 +266,6 @@ def update_reservation(reservation_id):
         if conn.is_connected():
             conn.close()
 
-# ----- DELETE Endpoints -----
 @bp.route('/booking/reservations/<reservation_id>', methods=['DELETE'])
 def delete_reservation(reservation_id):
     """
@@ -302,10 +290,8 @@ def delete_reservation(reservation_id):
     try:
         conn = db_pool.get_connection()
         cursor = conn.cursor()
-        # Delete related assignments first
         sql_assign = "DELETE FROM reservation_assignments WHERE reservation_id = %s"
         cursor.execute(sql_assign, (reservation_id,))
-        # Then delete the reservation
         sql_reservation = "DELETE FROM reservations WHERE reservation_id = %s"
         cursor.execute(sql_reservation, (reservation_id,))
         conn.commit()
@@ -318,11 +304,6 @@ def delete_reservation(reservation_id):
         if conn.is_connected():
             conn.close()
 
-# ===================================================
-# Reservation Assignments Endpoints
-# ===================================================
-
-# ----- GET Endpoints -----
 @bp.route('/booking/reservation_assignments', methods=['GET'])
 def get_reservation_assignments():
     """
@@ -417,7 +398,6 @@ def get_assignments_by_user(user_id):
         if conn.is_connected():
             conn.close()
 
-# ----- POST Endpoints -----
 @bp.route('/booking/reservation_assignments', methods=['POST'])
 def create_reservation_assignment():
     """
@@ -462,7 +442,6 @@ def create_reservation_assignment():
         if conn.is_connected():
             conn.close()
 
-# ----- PUT Endpoints -----
 @bp.route('/booking/reservation_assignments/<reservation_id>/<int:user_id>', methods=['PUT'])
 def update_reservation_assignment(reservation_id, user_id):
     """
@@ -515,7 +494,6 @@ def update_reservation_assignment(reservation_id, user_id):
         if conn.is_connected():
             conn.close()
 
-# ----- DELETE Endpoints -----
 @bp.route('/booking/reservation_assignments/<reservation_id>/<int:user_id>', methods=['DELETE'])
 def delete_reservation_assignment(reservation_id, user_id):
     """
