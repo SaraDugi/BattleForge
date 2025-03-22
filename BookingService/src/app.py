@@ -32,7 +32,6 @@ swagger = Swagger(app, template=swagger_template)
 
 app.config["JWT_SECRET_KEY"] = JWT_SECRET_KEY
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = JWT_ACCESS_TOKEN_EXPIRES
-
 jwt = JWTManager(app)
 
 if __name__ == '__main__':
