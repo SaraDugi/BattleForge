@@ -42,7 +42,7 @@ jobs:
           cd BookingService/src
           echo "${{ secrets.CA_PEM }}" > ca.pem
 
-      - name: Run Tests
+      - name: Run All Tests
         run: |
           cd BookingService/src
           python -m unittest discover -s . -p "test_*.py"
