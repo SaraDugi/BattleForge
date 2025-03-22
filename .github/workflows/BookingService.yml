@@ -9,6 +9,7 @@ on:
 jobs:
   booking-service-tests:
     runs-on: ubuntu-latest
+    environment: .env
 
     steps:
       - name: Checkout Repository
@@ -34,7 +35,12 @@ jobs:
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "DB_NAME=${{ vars.DB_NAME }}" >> .env
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
-          echo "USE_SSL=False" >> .env
+          echo "USE_SSL=True" >> .env
+
+      - name: Create SSL CA Certificate
+        run: |
+          cd BookingService/src
+          echo "${{ secrets.CA_PEM }}" > ca.pem
 
       - name: Run Tests
         run: |
