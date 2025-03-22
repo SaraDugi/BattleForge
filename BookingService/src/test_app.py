@@ -3,11 +3,49 @@ import os
 import json
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 from app import app
+from db import db_pool
 
 class BookingServiceTestCase(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
         self.app.testing = True
+
+        conn = db_pool.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("DROP TABLE IF EXISTS reservation_assignments;")
+        cursor.execute("DROP TABLE IF EXISTS reservations;")
+
+        cursor.execute("""
+        CREATE TABLE reservations (
+            reservation_id VARCHAR(36) PRIMARY KEY,
+            num_players INT NOT NULL,
+            start_time DATETIME NOT NULL,
+            duration INT NOT NULL,
+            table_assigned VARCHAR(50) NOT NULL
+        );""")
+
+        cursor.execute("""
+        CREATE TABLE reservation_assignments (
+            reservation_id VARCHAR(36),
+            user_id INT,
+            signed_up_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (reservation_id, user_id),
+            FOREIGN KEY (reservation_id) REFERENCES reservations(reservation_id) ON DELETE CASCADE
+        );""")
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+    def tearDown(self):
+        conn = db_pool.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DROP TABLE IF EXISTS reservation_assignments;")
+        cursor.execute("DROP TABLE IF EXISTS reservations;")
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     def test_index(self):
         response = self.app.get('/')
