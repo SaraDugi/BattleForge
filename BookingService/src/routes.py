@@ -8,12 +8,19 @@ bp = Blueprint('booking', __name__)
 def generate_id():
     return str(uuid4())
 
+# ---------------------------------------------------
+# General Routes
+# ---------------------------------------------------
+
 @bp.route('/')
 def index():
     return render_template("index.html")
 
-# ----------------- Reservations Endpoints -----------------
+# ===================================================
+# Reservations Endpoints
+# ===================================================
 
+# ----- GET Endpoints -----
 @bp.route('/booking/reservations', methods=['GET'])
 def get_reservations():
     """
@@ -38,60 +45,6 @@ def get_reservations():
         cursor.execute("SELECT * FROM reservations")
         rows = cursor.fetchall()
         return jsonify(rows), 200
-    except mysql.connector.Error as err:
-        abort(500, description=f"Database error: {err}")
-    finally:
-        if conn.is_connected():
-            conn.close()
-
-@bp.route('/booking/reservations', methods=['POST'])
-def create_reservation():
-    """
-    Create a Reservation
-    ---
-    tags:
-      - Reservations
-    operationId: createReservation
-    security:
-      - BearerAuth: []
-    parameters:
-      - in: body
-        name: reservation
-        schema:
-          type: object
-          required:
-            - num_players
-            - start_time
-            - duration
-            - table_assigned
-          properties:
-            num_players:
-              type: integer
-            start_time:
-              type: string
-              format: date-time
-            duration:
-              type: integer
-            table_assigned:
-              type: string
-    responses:
-      201:
-        description: Reservation created successfully.
-    """
-    data = request.get_json()
-    reservation_id = generate_id()
-    num_players = data.get('num_players')
-    start_time = data.get('start_time')
-    duration = data.get('duration')
-    table_assigned = data.get('table_assigned')
-    try:
-        conn = db_pool.get_connection()
-        cursor = conn.cursor()
-        sql = """INSERT INTO reservations (reservation_id, num_players, start_time, duration, table_assigned)
-                 VALUES (%s, %s, %s, %s, %s)"""
-        cursor.execute(sql, (reservation_id, num_players, start_time, duration, table_assigned))
-        conn.commit()
-        return jsonify({'reservation_id': reservation_id}), 201
     except mysql.connector.Error as err:
         abort(500, description=f"Database error: {err}")
     finally:
@@ -208,6 +161,62 @@ def get_reservations_by_table(table_assigned):
         if conn.is_connected():
             conn.close()
 
+# ----- POST Endpoints -----
+@bp.route('/booking/reservations', methods=['POST'])
+def create_reservation():
+    """
+    Create a Reservation
+    ---
+    tags:
+      - Reservations
+    operationId: createReservation
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: body
+        name: reservation
+        schema:
+          type: object
+          required:
+            - num_players
+            - start_time
+            - duration
+            - table_assigned
+          properties:
+            num_players:
+              type: integer
+            start_time:
+              type: string
+              format: date-time
+            duration:
+              type: integer
+            table_assigned:
+              type: string
+    responses:
+      201:
+        description: Reservation created successfully.
+    """
+    data = request.get_json()
+    reservation_id = generate_id()
+    num_players = data.get('num_players')
+    start_time = data.get('start_time')
+    duration = data.get('duration')
+    table_assigned = data.get('table_assigned')
+    try:
+        conn = db_pool.get_connection()
+        cursor = conn.cursor()
+        sql = """INSERT INTO reservations (reservation_id, num_players, start_time, duration, table_assigned)
+                 VALUES (%s, %s, %s, %s, %s)"""
+        cursor.execute(sql, (reservation_id, num_players, start_time, duration, table_assigned))
+        conn.commit()
+        return jsonify({'reservation_id': reservation_id}), 201
+    except mysql.connector.Error as err:
+        abort(500, description=f"Database error: {err}")
+    finally:
+        if conn.is_connected():
+            conn.close()
+
+# ----- PUT Endpoints -----
 @bp.route('/booking/reservations/<reservation_id>', methods=['PUT'])
 def update_reservation(reservation_id):
     """
@@ -268,6 +277,7 @@ def update_reservation(reservation_id):
         if conn.is_connected():
             conn.close()
 
+# ----- DELETE Endpoints -----
 @bp.route('/booking/reservations/<reservation_id>', methods=['DELETE'])
 def delete_reservation(reservation_id):
     """
@@ -308,15 +318,18 @@ def delete_reservation(reservation_id):
         if conn.is_connected():
             conn.close()
 
-# ----------------- Reservation Assignments Endpoints -----------------
+# ===================================================
+# Reservation Assignments Endpoints
+# ===================================================
 
+# ----- GET Endpoints -----
 @bp.route('/booking/reservation_assignments', methods=['GET'])
 def get_reservation_assignments():
     """
     Get All Reservation Assignments
     ---
     tags:
-      - Reservations
+      - Reservation Assignments
     operationId: getReservationAssignments
     security:
       - BearerAuth: []
@@ -340,13 +353,78 @@ def get_reservation_assignments():
         if conn.is_connected():
             conn.close()
 
+@bp.route('/booking/reservation_assignments/<reservation_id>', methods=['GET'])
+def get_assignments_by_reservation(reservation_id):
+    """
+    Get Reservation Assignments for a Specific Reservation
+    ---
+    tags:
+      - Reservation Assignments
+    operationId: getAssignmentsByReservation
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: reservation_id
+        type: string
+        required: true
+    responses:
+      200:
+        description: A list of assignments for the specified reservation.
+    """
+    try:
+        conn = db_pool.get_connection()
+        cursor = conn.cursor(dictionary=True)
+        sql = "SELECT * FROM reservation_assignments WHERE reservation_id = %s"
+        cursor.execute(sql, (reservation_id,))
+        rows = cursor.fetchall()
+        return jsonify(rows), 200
+    except mysql.connector.Error as err:
+        abort(500, description=f"Database error: {err}")
+    finally:
+        if conn.is_connected():
+            conn.close()
+
+@bp.route('/booking/reservation_assignments/user/<int:user_id>', methods=['GET'])
+def get_assignments_by_user(user_id):
+    """
+    Get Reservations Assigned to a Specific User
+    ---
+    tags:
+      - Reservation Assignments
+    operationId: getAssignmentsByUser
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: user_id
+        type: integer
+        required: true
+    responses:
+      200:
+        description: A list of reservations for the specified user.
+    """
+    try:
+        conn = db_pool.get_connection()
+        cursor = conn.cursor(dictionary=True)
+        sql = "SELECT * FROM reservation_assignments WHERE user_id = %s"
+        cursor.execute(sql, (user_id,))
+        rows = cursor.fetchall()
+        return jsonify(rows), 200
+    except mysql.connector.Error as err:
+        abort(500, description=f"Database error: {err}")
+    finally:
+        if conn.is_connected():
+            conn.close()
+
+# ----- POST Endpoints -----
 @bp.route('/booking/reservation_assignments', methods=['POST'])
 def create_reservation_assignment():
     """
     Create a Reservation Assignment
     ---
     tags:
-      - Reservations
+      - Reservation Assignments
     operationId: createReservationAssignment
     security:
       - BearerAuth: []
@@ -384,77 +462,14 @@ def create_reservation_assignment():
         if conn.is_connected():
             conn.close()
 
-@bp.route('/booking/reservation_assignments/<reservation_id>', methods=['GET'])
-def get_assignments_by_reservation(reservation_id):
-    """
-    Get Reservation Assignments for a Specific Reservation
-    ---
-    tags:
-      - Reservations
-    operationId: getAssignmentsByReservation
-    security:
-      - BearerAuth: []
-    parameters:
-      - in: path
-        name: reservation_id
-        type: string
-        required: true
-    responses:
-      200:
-        description: A list of assignments for the specified reservation.
-    """
-    try:
-        conn = db_pool.get_connection()
-        cursor = conn.cursor(dictionary=True)
-        sql = "SELECT * FROM reservation_assignments WHERE reservation_id = %s"
-        cursor.execute(sql, (reservation_id,))
-        rows = cursor.fetchall()
-        return jsonify(rows), 200
-    except mysql.connector.Error as err:
-        abort(500, description=f"Database error: {err}")
-    finally:
-        if conn.is_connected():
-            conn.close()
-
-@bp.route('/booking/reservation_assignments/user/<int:user_id>', methods=['GET'])
-def get_assignments_by_user(user_id):
-    """
-    Get Reservations Assigned to a Specific User
-    ---
-    tags:
-      - Reservations
-    operationId: getAssignmentsByUser
-    security:
-      - BearerAuth: []
-    parameters:
-      - in: path
-        name: user_id
-        type: integer
-        required: true
-    responses:
-      200:
-        description: A list of reservations for the specified user.
-    """
-    try:
-        conn = db_pool.get_connection()
-        cursor = conn.cursor(dictionary=True)
-        sql = "SELECT * FROM reservation_assignments WHERE user_id = %s"
-        cursor.execute(sql, (user_id,))
-        rows = cursor.fetchall()
-        return jsonify(rows), 200
-    except mysql.connector.Error as err:
-        abort(500, description=f"Database error: {err}")
-    finally:
-        if conn.is_connected():
-            conn.close()
-
+# ----- PUT Endpoints -----
 @bp.route('/booking/reservation_assignments/<reservation_id>/<int:user_id>', methods=['PUT'])
 def update_reservation_assignment(reservation_id, user_id):
     """
     Update a Reservation Assignment
     ---
     tags:
-      - Reservations
+      - Reservation Assignments
     operationId: updateReservationAssignment
     security:
       - BearerAuth: []
@@ -500,13 +515,14 @@ def update_reservation_assignment(reservation_id, user_id):
         if conn.is_connected():
             conn.close()
 
+# ----- DELETE Endpoints -----
 @bp.route('/booking/reservation_assignments/<reservation_id>/<int:user_id>', methods=['DELETE'])
 def delete_reservation_assignment(reservation_id, user_id):
     """
     Delete a Reservation Assignment
     ---
     tags:
-      - Reservations
+      - Reservation Assignments
     operationId: deleteReservationAssignment
     security:
       - BearerAuth: []

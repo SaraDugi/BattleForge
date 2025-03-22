@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask
 from flasgger import Swagger
 from flask_jwt_extended import JWTManager
 from routes import bp as booking_bp
