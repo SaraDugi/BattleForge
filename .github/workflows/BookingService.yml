@@ -2,33 +2,13 @@ name: BookingService Tests
 
 on:
   push:
-    branches:
-      - main
-      - dev
+    branches: [ "main", "dev" ]
   pull_request:
-    branches:
-      - main
-      - dev
+    branches: [ "main", "dev" ]
 
 jobs:
-  test:
+  booking-service-tests:
     runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: testpassword
-          MYSQL_DATABASE: booking_db
-          MYSQL_USER: testuser
-          MYSQL_PASSWORD: testpassword
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost -P 3306"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
 
     steps:
       - name: Checkout Repository
@@ -41,20 +21,22 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          cd BookingService/src
           python -m pip install --upgrade pip
-          pip install -r BookingService/src/requirements.txt
+          pip install -r requirements.txt
 
       - name: Configure Test Environment
-        working-directory: BookingService/src
         run: |
-          echo "DB_HOST=127.0.0.1" >> .env
-          echo "DB_PORT=3306" >> .env
-          echo "DB_USER=testuser" >> .env
-          echo "DB_PASSWORD=testpassword" >> .env
-          echo "DB_NAME=booking_db" >> .env
-          echo "JWT_SECRET_KEY=test_jwt_key" >> .env
+          cd BookingService/src
+          echo "DB_HOST=${{ vars.DB_HOST }}" >> .env
+          echo "DB_PORT=${{ vars.DB_PORT }}" >> .env
+          echo "DB_USER=${{ vars.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_NAME=${{ vars.DB_NAME }}" >> .env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          echo "USE_SSL=False" >> .env
 
       - name: Run Tests
-        working-directory: BookingService/src
         run: |
+          cd BookingService/src
           python -m unittest discover -s . -p "test_*.py"
