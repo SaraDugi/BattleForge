@@ -38,4 +38,5 @@ jobs:
           DB_NAME: ${{ secrets.DB_NAME }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
         run: |
+          export DB_PORT=${DB_PORT:-3306}
           python test_app.py
