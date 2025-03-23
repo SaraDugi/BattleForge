@@ -2,6 +2,7 @@ from uuid import uuid4
 from flask import Blueprint, jsonify, abort, render_template, request
 import mysql.connector
 from db import db_pool
+from flask_jwt_extended import jwt_required
 
 bp = Blueprint('booking', __name__)
 
@@ -151,7 +152,8 @@ def get_reservations_by_table(table_assigned):
     finally:
         if conn.is_connected():
             conn.close()
-
+            
+@jwt_required()
 @bp.route('/booking/reservations', methods=['POST'])
 def create_reservation():
     """
@@ -205,7 +207,8 @@ def create_reservation():
     finally:
         if conn.is_connected():
             conn.close()
-
+            
+@jwt_required()
 @bp.route('/booking/reservations/<reservation_id>', methods=['PUT'])
 def update_reservation(reservation_id):
     """
@@ -266,6 +269,7 @@ def update_reservation(reservation_id):
         if conn.is_connected():
             conn.close()
 
+@jwt_required()
 @bp.route('/booking/reservations/<reservation_id>', methods=['DELETE'])
 def delete_reservation(reservation_id):
     """
@@ -398,6 +402,7 @@ def get_assignments_by_user(user_id):
         if conn.is_connected():
             conn.close()
 
+@jwt_required()
 @bp.route('/booking/reservation_assignments', methods=['POST'])
 def create_reservation_assignment():
     """
@@ -442,6 +447,7 @@ def create_reservation_assignment():
         if conn.is_connected():
             conn.close()
 
+@jwt_required()
 @bp.route('/booking/reservation_assignments/<reservation_id>/<int:user_id>', methods=['PUT'])
 def update_reservation_assignment(reservation_id, user_id):
     """
@@ -494,6 +500,7 @@ def update_reservation_assignment(reservation_id, user_id):
         if conn.is_connected():
             conn.close()
 
+@jwt_required()
 @bp.route('/booking/reservation_assignments/<reservation_id>/<int:user_id>', methods=['DELETE'])
 def delete_reservation_assignment(reservation_id, user_id):
     """

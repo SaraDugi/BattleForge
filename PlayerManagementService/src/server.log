@@ -23,3 +23,7 @@
 {"level":"info","message":"FindPlayers: returning 2 player(s)","timestamp":"2025-03-21T18:11:42.645Z"}
 {"level":"info","message":"gRPC server running at 0.0.0.0:5000","timestamp":"2025-03-21T18:22:50.758Z"}
 {"level":"info","message":"FindPlayers: returning 2 player(s)","timestamp":"2025-03-21T18:27:26.657Z"}
+{"level":"info","message":"gRPC server running at 0.0.0.0:5000","timestamp":"2025-03-23T20:08:53.291Z"}
+{"level":"info","message":"gRPC server running at 0.0.0.0:5000","timestamp":"2025-03-23T20:10:15.510Z"}
+{"level":"info","message":"gRPC server running at 0.0.0.0:5000","timestamp":"2025-03-23T20:13:25.455Z"}
+{"level":"info","message":"FindPlayers: returning 2 player(s)","timestamp":"2025-03-23T20:14:22.632Z"}

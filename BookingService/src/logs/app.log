@@ -4,3 +4,9 @@
 2025-03-22 19:54:43,622 - BookingService - INFO - Database connected successfully
 2025-03-22 19:54:43,789 - BookingService - INFO - Starting BookingService on http://localhost:5050
 2025-03-22 19:54:43,789 - BookingService - INFO - Swagger docs available at http://localhost:5050/apidocs
+2025-03-23 19:47:21,948 - BookingService - INFO - Database connected successfully
+2025-03-23 19:47:22,110 - BookingService - INFO - Starting BookingService on http://localhost:5050
+2025-03-23 19:47:22,110 - BookingService - INFO - Swagger docs available at http://localhost:5050/apidocs
+2025-03-23 19:47:24,774 - BookingService - INFO - Database connected successfully
+2025-03-23 19:47:24,976 - BookingService - INFO - Starting BookingService on http://localhost:5050
+2025-03-23 19:47:24,976 - BookingService - INFO - Swagger docs available at http://localhost:5050/apidocs
