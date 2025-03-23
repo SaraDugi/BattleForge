@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: "example"
+      MYSQL_DATABASE: "booking_db"
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+
+  bookingservice:
+    build:
+      context: ./BookingService/src
+      dockerfile: Dockerfile
+    container_name: bookingservice
+    ports:
+      - "5050:5050"
+    environment:
+      DB_HOST: "db"
+      DB_PORT: "3306"
+      DB_USER: "root"
+      DB_PASSWORD: "example"
+      DB_NAME: "booking_db"
+      JWT_SECRET_KEY: "zelo-tajno-geslo"
+    depends_on:
+      - db
+
+  playermanagementservice:
+    build:
+      context: ./PlayerManagementService 
+      dockerfile: Dockerfile
+    container_name: playermanagementservice
+    ports:
+      - "5000:5000"
+    # ...
+
+
+volumes:
+  db-data:
