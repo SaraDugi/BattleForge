@@ -9,8 +9,12 @@ on:
       - feature/**
 
 jobs:
-  test:
+  test-battle-service:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./BattleSimulationService
 
     services:
       mysql:

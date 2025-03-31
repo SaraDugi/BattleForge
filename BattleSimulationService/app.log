@@ -3,3 +3,4 @@
 {"level":"info","message":"Connected to ActiveMQ with SSL"}
 {"level":"info","message":"Connected to ActiveMQ with SSL"}
 {"level":"error","message":"Error connecting to ActiveMQ:","stack":[{"code":"ECONNREFUSED","connectArgs":{"connectHeaders":{"host":"/","login":"admin","passcode":"admin"},"host":"localhost","port":"61613","ssl":false,"timeout":3000}}]}
+{"level":"error","message":"Error connecting to ActiveMQ:","stack":[{"code":"ECONNREFUSED","connectArgs":{"connectHeaders":{"host":"/","login":"admin","passcode":"admin"},"host":"localhost","port":"61613","ssl":false,"timeout":3000}}]}
