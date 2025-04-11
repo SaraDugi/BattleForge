@@ -114,8 +114,6 @@ module.exports = {
 
   async AddAchievement(call, callback) {
     try {
-      authenticate(call);
-
       const { id, achievement } = call.request;
       if (!achievement) {
         logger.warn('AddAchievement: missing achievement');
@@ -142,8 +140,6 @@ module.exports = {
 
   async DeletePlayerById(call, callback) {
     try {
-      authenticate(call);
-
       const { id } = call.request;
       const affectedRows = await Player.deleteById(id);
       if (affectedRows === 0) {
@@ -163,8 +159,6 @@ module.exports = {
 
   async UpdateProfile(call, callback) {
     try {
-      authenticate(call);
-
       const { id, firstName, lastName, nickname } = call.request;
       const affectedRows = await Player.updateProfile(id, firstName, lastName, nickname);
       if (affectedRows === 0) {
@@ -181,8 +175,6 @@ module.exports = {
 
   async UpdateEmail(call, callback) {
     try {
-      authenticate(call);
-
       const { id, email } = call.request;
       const affectedRows = await Player.updateEmail(id, email);
       if (affectedRows === 0) {
@@ -199,8 +191,6 @@ module.exports = {
 
   async UpdatePassword(call, callback) {
     try {
-      authenticate(call);
-
       const { id, accountPassword } = call.request;
       const affectedRows = await Player.updatePassword(id, accountPassword);
       if (affectedRows === 0) {
@@ -217,8 +207,6 @@ module.exports = {
 
   async UpdateScore(call, callback) {
     try {
-      authenticate(call);
-
       const { id, score } = call.request;
       const affectedRows = await Player.updateScore(id, score);
       if (affectedRows === 0) {
@@ -235,8 +223,6 @@ module.exports = {
 
   async UpdateStats(call, callback) {
     try {
-      authenticate(call);
-
       const { id, wins, losses, tournamentsParticipated } = call.request;
       const affectedRows = await Player.updateStats(id, wins, losses, tournamentsParticipated);
       if (affectedRows === 0) {
@@ -253,8 +239,6 @@ module.exports = {
 
   async UpdateMainFaction(call, callback) {
     try {
-      authenticate(call);
-
       const { id, mainFaction } = call.request;
       const affectedRows = await Player.updateMainFaction(id, mainFaction);
       if (affectedRows === 0) {
@@ -271,8 +255,6 @@ module.exports = {
 
   async UpdateMedia(call, callback) {
     try {
-      authenticate(call);
-
       const { id, profilePic, banner } = call.request;
       const affectedRows = await Player.updateMedia(id, profilePic, banner);
       if (affectedRows === 0) {
