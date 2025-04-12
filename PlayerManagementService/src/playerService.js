@@ -261,28 +261,39 @@ module.exports = {
 
   async Login(call, callback) {
     const { email, password } = call.request;
+  
     try {
       const user = await Player.getByEmail(email);
+  
       if (!user) {
         logger.warn(`Login: no user found for email=${email}`);
         return callback(
           { code: grpc.status.UNAUTHENTICATED, message: 'Invalid email or password' },
-          undefined
+          null
         );
       }
+  
       if (user.account_password !== password) {
         logger.warn(`Login: invalid password for email=${email}`);
         return callback(
           { code: grpc.status.UNAUTHENTICATED, message: 'Invalid email or password' },
-          undefined
+          null
         );
       }
-
+  
       logger.info(`Login: user id=${user.id} logged in`);
-      return callback(null, { message: 'Login successful' });
+      return callback(null, {
+        message: 'Login successful',
+        userId: user.id,
+        nickname: user.nickname
+      });
+  
     } catch (error) {
       logger.error(`Error logging in: ${error.message}`);
-      return callback(error, undefined);
-    }
+      return callback(
+        { code: grpc.status.INTERNAL, message: 'Internal server error' },
+        null
+      );
+    }  
   }
 };

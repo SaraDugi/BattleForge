@@ -21,16 +21,11 @@ jest.mock('../src/player', () => ({
 }));
 const Player = require('../src/player');
 
-jest.mock('../src/auth', () => ({
-  authenticate: jest.fn()
-}));
-const { authenticate } = require('../src/auth');
-
 function createCall(requestData) {
   return {
     request: requestData,
     metadata: {
-      get: jest.fn(() => []), 
+      get: jest.fn(() => []),
     }
   };
 }
@@ -89,16 +84,13 @@ describe('playerService Tests', () => {
 
       await playerService.FindPlayers(call, callback);
 
-      expect(callback).toHaveBeenCalledWith(
-        expect.any(Error),
-        null
-      );
+      expect(callback).toHaveBeenCalledWith(expect.any(Error), null);
     });
   });
 
   describe('CreatePlayer', () => {
     it('should create a new player', async () => {
-      Player.create.mockResolvedValue(101); 
+      Player.create.mockResolvedValue(101);
 
       const call = createCall({ firstName: 'New', lastName: 'User' });
       const callback = createCallback();
@@ -117,17 +109,13 @@ describe('playerService Tests', () => {
 
       await playerService.CreatePlayer(call, callback);
 
-      expect(callback).toHaveBeenCalledWith(
-        expect.any(Error),
-        null
-      );
+      expect(callback).toHaveBeenCalledWith(expect.any(Error), null);
     });
   });
 
   describe('AddAchievement', () => {
-    it('should add an achievement when authenticated', async () => {
-      authenticate.mockImplementation(() => true); 
-      Player.addAchievement.mockResolvedValue(1); 
+    it('should add an achievement', async () => {
+      Player.addAchievement.mockResolvedValue(1);
 
       const call = createCall({ id: 10, achievement: 'Won Tournament' });
       const callback = createCallback();
@@ -138,27 +126,8 @@ describe('playerService Tests', () => {
       expect(callback).toHaveBeenCalledWith(null, {});
     });
 
-    it('should return UNAUTHENTICATED if token is invalid', async () => {
-      authenticate.mockImplementation(() => {
-        throw new Error('Invalid token');
-      });
-
-      const call = createCall({ id: 10, achievement: 'Test' });
-      const callback = createCallback();
-
-      await playerService.AddAchievement(call, callback);
-
-      expect(callback).toHaveBeenCalledWith(
-        expect.objectContaining({
-          code: grpc.status.UNAUTHENTICATED,
-          message: 'Invalid token'
-        })
-      );
-    });
-
     it('should return NOT_FOUND if no row is updated', async () => {
-      authenticate.mockImplementation(() => true);
-      Player.addAchievement.mockResolvedValue(0); 
+      Player.addAchievement.mockResolvedValue(0);
 
       const call = createCall({ id: 999, achievement: 'Test' });
       const callback = createCallback();
@@ -172,11 +141,24 @@ describe('playerService Tests', () => {
         })
       );
     });
+
+    it('should handle missing achievement', async () => {
+      const call = createCall({ id: 1 }); // No achievement provided
+      const callback = createCallback();
+
+      await playerService.AddAchievement(call, callback);
+
+      expect(callback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: grpc.status.INVALID_ARGUMENT,
+          message: 'Achievement is required'
+        })
+      );
+    });
   });
 
   describe('DeletePlayerById', () => {
     it('should delete player if found', async () => {
-      authenticate.mockImplementation(() => true);
       Player.deleteById.mockResolvedValue(1);
 
       const call = createCall({ id: 22 });
@@ -189,7 +171,6 @@ describe('playerService Tests', () => {
     });
 
     it('should return NOT_FOUND if no player was deleted', async () => {
-      authenticate.mockImplementation(() => true);
       Player.deleteById.mockResolvedValue(0);
 
       const call = createCall({ id: 999 });
@@ -208,7 +189,6 @@ describe('playerService Tests', () => {
 
   describe('UpdateProfile', () => {
     it('should update profile if found', async () => {
-      authenticate.mockImplementation(() => true);
       Player.updateProfile.mockResolvedValue(1);
 
       const call = createCall({
@@ -226,7 +206,6 @@ describe('playerService Tests', () => {
     });
 
     it('should return NOT_FOUND if no changes', async () => {
-      authenticate.mockImplementation(() => true);
       Player.updateProfile.mockResolvedValue(0);
 
       const call = createCall({
@@ -247,7 +226,6 @@ describe('playerService Tests', () => {
 
   describe('UpdateEmail', () => {
     it('should update email if found', async () => {
-      authenticate.mockImplementation(() => true);
       Player.updateEmail.mockResolvedValue(1);
 
       const call = createCall({ id: 1, email: 'new@example.com' });
@@ -262,7 +240,6 @@ describe('playerService Tests', () => {
 
   describe('UpdatePassword', () => {
     it('should update password if found', async () => {
-      authenticate.mockImplementation(() => true);
       Player.updatePassword.mockResolvedValue(1);
 
       const call = createCall({ id: 7, accountPassword: 'secret' });
@@ -277,7 +254,6 @@ describe('playerService Tests', () => {
 
   describe('UpdateScore', () => {
     it('should update score if found', async () => {
-      authenticate.mockImplementation(() => true);
       Player.updateScore.mockResolvedValue(1);
 
       const call = createCall({ id: 10, score: 999 });
@@ -292,7 +268,6 @@ describe('playerService Tests', () => {
 
   describe('UpdateStats', () => {
     it('should update stats if found', async () => {
-      authenticate.mockImplementation(() => true);
       Player.updateStats.mockResolvedValue(1);
 
       const call = createCall({ id: 33, wins: 5, losses: 2, tournamentsParticipated: 3 });
@@ -307,7 +282,6 @@ describe('playerService Tests', () => {
 
   describe('UpdateMainFaction', () => {
     it('should update main faction if found', async () => {
-      authenticate.mockImplementation(() => true);
       Player.updateMainFaction.mockResolvedValue(1);
 
       const call = createCall({ id: 88, mainFaction: 'NewFaction' });
@@ -322,7 +296,6 @@ describe('playerService Tests', () => {
 
   describe('UpdateMedia', () => {
     it('should update media if found', async () => {
-      authenticate.mockImplementation(() => true);
       Player.updateMedia.mockResolvedValue(1);
 
       const call = createCall({ id: 50, profilePic: 'pic.png', banner: 'banner.png' });
@@ -336,9 +309,10 @@ describe('playerService Tests', () => {
   });
 
   describe('Login', () => {
-    it('should return token if valid credentials', async () => {
+    it('should return success message if valid credentials', async () => {
       Player.getByEmail.mockResolvedValue({
         id: 99,
+        nickname: 'Champ',
         account_password: 'pass123'
       });
 
@@ -347,10 +321,11 @@ describe('playerService Tests', () => {
 
       await playerService.Login(call, callback);
 
-      expect(callback.mock.calls[0][0]).toBeNull();
-      const response = callback.mock.calls[0][1];
-      expect(response.token).toBeDefined();
-      expect(response.message).toBe('Login successful');
+      expect(callback).toHaveBeenCalledWith(null, {
+        message: 'Login successful',
+        userId: 99,
+        nickname: 'Champ'
+      });
     });
 
     it('should return UNAUTHENTICATED if user not found', async () => {
@@ -366,7 +341,7 @@ describe('playerService Tests', () => {
           code: grpc.status.UNAUTHENTICATED,
           message: 'Invalid email or password'
         }),
-        undefined
+        null
       );
     });
 
@@ -386,7 +361,7 @@ describe('playerService Tests', () => {
           code: grpc.status.UNAUTHENTICATED,
           message: 'Invalid email or password'
         }),
-        undefined
+        null
       );
     });
   });
