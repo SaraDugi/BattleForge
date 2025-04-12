@@ -1,10 +1,6 @@
 const grpc = require('@grpc/grpc-js');
-const jwt = require('jsonwebtoken');
 const logger = require('./logger');
 const Player = require('./player');
-const { authenticate } = require('./auth');
-
-const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
 module.exports = {
   async FindPlayers(call, callback) {
@@ -131,9 +127,6 @@ module.exports = {
       callback(null, {});
     } catch (error) {
       logger.error(`Error adding achievement: ${error.message}`);
-      if (error.message.includes('authorization') || error.message.includes('token')) {
-        return callback({ code: grpc.status.UNAUTHENTICATED, message: error.message });
-      }
       callback(error, null);
     }
   },
@@ -150,9 +143,6 @@ module.exports = {
       callback(null, {});
     } catch (error) {
       logger.error(`Error deleting player: ${error.message}`);
-      if (error.message.includes('token')) {
-        return callback({ code: grpc.status.UNAUTHENTICATED, message: error.message });
-      }
       callback(error, null);
     }
   },
@@ -287,14 +277,12 @@ module.exports = {
           undefined
         );
       }
-  
-      const payload = { id: user.id, role: 'player', email: user.email };
-      const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
+
       logger.info(`Login: user id=${user.id} logged in`);
-      return callback(null, { token, message: 'Login successful' });
+      return callback(null, { message: 'Login successful' });
     } catch (error) {
       logger.error(`Error logging in: ${error.message}`);
       return callback(error, undefined);
     }
-  }  
+  }
 };
