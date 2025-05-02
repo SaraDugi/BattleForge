@@ -45,6 +45,20 @@ services:
       ACTIVEMQ_USERNAME: admin
       ACTIVEMQ_PASSCODE: admin
 
+  web-gateway:
+    build:
+      context: ./APIGateway/web-gateway
+      dockerfile: Dockerfile
+    container_name: web-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - playermanagementservice
+      - bookingservice
+      - battle-simulation
+    environment:
+      GATEWAY_PORT: 8080
+
   battle-simulation:
     build:
       context: ./BattleSimulationService

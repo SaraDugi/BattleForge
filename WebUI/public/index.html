@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BattleForge Dashboard</title>
+</head>
+<body>
+  <h1>Battle Forge</h1>
+
+  <section>
+    <h2>Leaderboards</h2>
+    <button onclick="getPlayers()">Get Players</button>
+    <ul id="playerList"></ul>
+  </section>
+
+  <section>
+    <h2>Reservations</h2>
+    <button onclick="getReservations()">Get Reservations</button>
+    <ul id="reservationList"></ul>
+  </section>
+
+  <section>
+    <h2>Battles</h2>
+    <button onclick="getBattles()">Get Battles</button>
+    <ul id="battleList"></ul>
+  </section>
+
+  <script>
+    async function getPlayers() {
+      try {
+        const res = await fetch('/api/player');
+        const data = await res.json();
+        const list = document.getElementById('playerList');
+        list.innerHTML = '';
+        (data.players || []).forEach(p => {
+          const li = document.createElement('li');
+          li.textContent = `ID: ${p.id} | ${p.nickname} | ${p.email} | Score: ${p.score}`;
+          list.appendChild(li);
+        });
+      } catch (err) {
+        alert('Failed to fetch players');
+      }
+    }
+
+    async function getReservations() {
+      try {
+        const res = await fetch('/api/reservations');
+        const data = await res.json();
+        const list = document.getElementById('reservationList');
+        list.innerHTML = '';
+        data.forEach(r => {
+          const li = document.createElement('li');
+          li.textContent = `ID: ${r.reservation_id} | Table: ${r.table_assigned} | Players: ${r.num_players}`;
+          list.appendChild(li);
+        });
+      } catch (err) {
+        alert('Failed to fetch reservations');
+      }
+    }
+
+    async function getBattles() {
+      try {
+        const res = await fetch('/api/battles');
+        const data = await res.json();
+        const list = document.getElementById('battleList');
+        list.innerHTML = '';
+        data.forEach(b => {
+          const li = document.createElement('li');
+          li.textContent = `ID: ${b.id} | ${b.player1Id} vs ${b.player2Id} | Status: ${b.battleStatus}`;
+          list.appendChild(li);
+        });
+      } catch (err) {
+        alert('Failed to fetch battles');
+      }
+    }
+  </script>
+</body>
+</html>
