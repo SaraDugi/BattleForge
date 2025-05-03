@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package player;
+
+import "google/protobuf/empty.proto";
+
+message Player {
+  int32 id = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string nickname = 4;
+  string email = 5;
+  string accountPassword = 6;
+  string mainFaction = 7;
+  double eloRating = 8;
+  int32 wins = 9;
+  int32 losses = 10;
+  int32 tournamentsParticipated = 11;
+  string achievements = 12;  
+  int32 score = 13;
+  string profilePic = 14;
+  string banner = 15;
+  int32 teamId = 16; 
+}
+
+message PlayerList {
+  repeated Player players = 1;
+}
+
+message PlayerIdRequest {
+  int32 id = 1;
+}
+
+message AchievementRequest {
+  int32 id = 1;
+  string achievement = 2;
+}
+
+message PlayerQueryRequest {
+  int32 id = 1;
+  string nickname = 2;
+  int32 score = 3;
+  string mainFaction = 4;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string token = 1;
+  string message = 2;
+}
+
+service PlayerService {
+  rpc FindPlayers (PlayerQueryRequest) returns (PlayerList);
+  rpc CreatePlayer (Player) returns (PlayerIdRequest);
+  rpc AddAchievement (AchievementRequest) returns (google.protobuf.Empty);
+  rpc DeletePlayerById (PlayerIdRequest) returns (google.protobuf.Empty);
+
+  rpc UpdateProfile (Player) returns (google.protobuf.Empty);
+  rpc UpdateEmail (Player) returns (google.protobuf.Empty);
+  rpc UpdatePassword (Player) returns (google.protobuf.Empty);
+  rpc UpdateScore (Player) returns (google.protobuf.Empty);
+  rpc UpdateStats (Player) returns (google.protobuf.Empty);
+  rpc UpdateMainFaction (Player) returns (google.protobuf.Empty);
+  rpc UpdateMedia (Player) returns (google.protobuf.Empty);
+
+  rpc Login (LoginRequest) returns (LoginResponse);
+}

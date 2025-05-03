@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register | BattleForge</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav>
+    <ul class="nav">
+      <li><a href="/">Home</a></li>
+      <li><a href="/players.html">Players</a></li>
+      <li><a href="/reservations.html">Reservations</a></li>
+      <li><a href="/battles.html">Battles</a></li>
+      <li><a href="/login.html">Login</a></li>
+      <li><a href="/register.html">Register</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <h1>Register</h1>
+    <form id="registerForm">
+      <label>First Name: <input type="text" name="firstName" required></label><br>
+      <label>Last Name: <input type="text" name="lastName" required></label><br>
+      <label>Nickname: <input type="text" name="nickname" required></label><br>
+      <label>Email: <input type="email" name="email" required></label><br>
+      <label>Password: <input type="password" name="accountPassword" required></label><br>
+      <button type="submit">Register</button>
+    </form>
+    <p id="registerStatus"></p>
+  </main>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const body = {
+        firstName: form.firstName.value,
+        lastName: form.lastName.value,
+        nickname: form.nickname.value,
+        email: form.email.value,
+        accountPassword: form.accountPassword.value
+      };
+      const res = await fetch('/api/player', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      document.getElementById('registerStatus').textContent = data.id ? 'Registration successful!' : data.error;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reservations | BattleForge</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav>
+    <ul class="nav">
+      <li><a href="/">Home</a></li>
+      <li><a href="/players.html">Players</a></li>
+      <li><a href="/reservations.html">Reservations</a></li>
+      <li><a href="/battles.html">Battles</a></li>
+      <li><a href="/login.html">Login</a></li>
+      <li><a href="/register.html">Register</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <h1>Reservations</h1>
+    <button onclick="loadReservations()">Load Reservations</button>
+    <ul id="reservations"></ul>
+  </main>
+
+  <script>
+    async function loadReservations() {
+      const res = await fetch('/api/reservations');
+      const data = await res.json();
+      const list = document.getElementById('reservations');
+      list.innerHTML = '';
+      data.forEach(r => {
+        const item = document.createElement('li');
+        item.textContent = `Reservation #${r.reservation_id}, Table ${r.table_assigned}, Players: ${r.num_players}`;
+        list.appendChild(item);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,18 +1,29 @@
-// gateway.js
-require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const playerClient = require('./grpcPlayerClient');
 const axios = require('axios');
 const logger = require('./logger');
-
+const grpc = require('@grpc/grpc-js');
+const protoLoader = require('@grpc/proto-loader');
+const path = require('path');
 const app = express();
 app.use(bodyParser.json());
-
 const BOOKING_URL = 'http://localhost:5050';
-const BATTLE_URL = 'http://localhost:3000';
+const BATTLE_URL = 'http://battle-simulation:7000';
+const PROTO_PATH = path.join(__dirname, 'protos', 'player.proto');
+const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true,
+});
+const playerProto = grpc.loadPackageDefinition(packageDefinition).player;
 
-// ----- PLAYER -----
+const playerClient = new playerProto.PlayerService(
+  'playermanagementservice:5000',
+  grpc.credentials.createInsecure()
+);
+
 app.post('/api/player', (req, res) => playerClient.CreatePlayer(req.body, grpcResponse(res)));
 app.get('/api/player', (req, res) => playerClient.FindPlayers(req.query, grpcResponse(res)));
 app.post('/api/player/login', (req, res) => playerClient.Login(req.body, grpcResponse(res)));
@@ -31,26 +42,37 @@ app.patch('/api/player/:id', (req, res) => {
 
   res.status(400).json({ error: 'No valid update fields provided' });
 });
-
 app.delete('/api/player/:id', (req, res) => playerClient.DeletePlayerById({ id: parseInt(req.params.id) }, grpcResponse(res)));
-app.post('/api/player/:id/achievement', (req, res) => playerClient.AddAchievement({ id: parseInt(req.params.id), achievement: req.body.achievement }, grpcResponse(res)));
+app.post('/api/player/:id/achievement', (req, res) => {
+  playerClient.AddAchievement(
+    { id: parseInt(req.params.id), achievement: req.body.achievement },
+    grpcResponse(res)
+  );
+});
+
 app.get('/api/reservations', proxyToBooking);
 app.get('/api/reservations/:id', proxyToBooking);
 app.get('/api/reservations/search', proxyToBooking);
+app.get('/api/reservations/by-date', proxyToBooking);
+app.get('/api/reservations/table/:table', proxyToBooking);
 app.post('/api/reservations', proxyToBooking);
-app.patch('/api/reservations/:id', proxyToBooking);
+app.put('/api/reservations/:id', proxyToBooking);
 app.delete('/api/reservations/:id', proxyToBooking);
-app.get('/api/reservations/:id/assignments', proxyToBooking);
-app.post('/api/reservations/:id/assignments', proxyToBooking);
-app.patch('/api/reservations/:id/assignments/:userId', proxyToBooking);
-app.delete('/api/reservations/:id/assignments/:userId', proxyToBooking);
+
+app.get('/api/reservation_assignments', proxyToBooking);
+app.get('/api/reservation_assignments/:reservation_id', proxyToBooking);
+app.get('/api/reservation_assignments/user/:user_id', proxyToBooking);
+app.post('/api/reservation_assignments', proxyToBooking);
+app.put('/api/reservation_assignments/:reservation_id/:user_id', proxyToBooking);
+app.delete('/api/reservation_assignments/:reservation_id/:user_id', proxyToBooking);
+
 app.post('/api/battles', proxyToBattle);
 app.get('/api/battles', proxyToBattle);
-app.get('/api/battles/:id', proxyToBattle);
-app.patch('/api/battles/:id/status', proxyToBattle);
-app.patch('/api/battles/:id/winner', proxyToBattle);
-app.post('/api/battles/:id/events', proxyToBattle);
-app.get('/api/battles/:id/events', proxyToBattle);
+app.get('/api/battles/:battleId', proxyToBattle);
+app.put('/api/battles/:battleId/status', proxyToBattle);
+app.put('/api/battles/:battleId/winner', proxyToBattle);
+app.post('/api/battles/:battleId/events', proxyToBattle);
+app.get('/api/battles/:battleId/events', proxyToBattle);
 
 function grpcResponse(res) {
   return (err, result) => {
@@ -67,7 +89,7 @@ async function proxyToBooking(req, res) {
       url,
       data: req.body,
       params: req.query,
-      headers: req.headers
+      headers: req.headers,
     });
     res.status(response.status).json(response.data);
   } catch (err) {
@@ -84,7 +106,7 @@ async function proxyToBattle(req, res) {
       url,
       data: req.body,
       params: req.query,
-      headers: req.headers
+      headers: req.headers,
     });
     res.status(response.status).json(response.data);
   } catch (err) {
@@ -94,4 +116,6 @@ async function proxyToBattle(req, res) {
 }
 
 const PORT = process.env.GATEWAY_PORT || 8080;
-app.listen(PORT, () => logger.info(`Unified Gateway listening on http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  logger.info(`Unified Gateway listening on http://localhost:${PORT}`);
+});

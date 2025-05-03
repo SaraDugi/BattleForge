@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Players | BattleForge</title>
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+      cursor: pointer;
+    }
+
+    th:hover {
+      background-color: #2980b9;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <ul class="nav">
+      <li><a href="/">Home</a></li>
+      <li><a href="/players">Players</a></li>
+      <li><a href="/reservations">Reservations</a></li>
+      <li><a href="/battles">Battles</a></li>
+      <li><a href="/login">Login</a></li>
+      <li><a href="/register">Register</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <h1>Player Leaderboard</h1>
+    <table id="playersTable">
+      <thead>
+        <tr>
+          <th onclick="sortTable(0)">ID</th>
+          <th onclick="sortTable(1)">Nickname</th>
+          <th onclick="sortTable(2)">Email</th>
+          <th onclick="sortTable(3)">Score</th>
+        </tr>
+      </thead>
+      <tbody id="playersBody">
+        <!-- Players will be populated here -->
+      </tbody>
+    </table>
+  </main>
+
+  <script>
+    async function loadPlayers() {
+      const response = await fetch('/api/player');
+      const data = await response.json();
+      const tbody = document.getElementById('playersBody');
+      tbody.innerHTML = '';
+
+      (data.players || []).forEach(player => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${player.id}</td>
+          <td>${player.nickname}</td>
+          <td>${player.email}</td>
+          <td>${player.score}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function sortTable(colIndex) {
+      const table = document.getElementById("playersTable");
+      const rows = Array.from(table.rows).slice(1);
+      const asc = table.getAttribute("data-sort-dir") !== "asc";
+      table.setAttribute("data-sort-dir", asc ? "asc" : "desc");
+
+      rows.sort((a, b) => {
+        const cellA = a.cells[colIndex].innerText;
+        const cellB = b.cells[colIndex].innerText;
+
+        return asc
+          ? cellA.localeCompare(cellB, undefined, { numeric: true })
+          : cellB.localeCompare(cellA, undefined, { numeric: true });
+      });
+
+      const tbody = table.tBodies[0];
+      rows.forEach(row => tbody.appendChild(row));
+    }
+
+    // Load on page load
+    window.onload = loadPlayers;
+  </script>
+</body>
+</html>
