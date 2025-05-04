@@ -2,40 +2,93 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Reservations | BattleForge</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="./style.css"/>
 </head>
 <body>
   <nav>
     <ul class="nav">
       <li><a href="/">Home</a></li>
-      <li><a href="/players.html">Players</a></li>
-      <li><a href="/reservations.html">Reservations</a></li>
-      <li><a href="/battles.html">Battles</a></li>
-      <li><a href="/login.html">Login</a></li>
-      <li><a href="/register.html">Register</a></li>
+      <li><a href="/players">Players</a></li>
+      <li><a href="/reservations">Reservations</a></li>
+      <li><a href="/battles">Battles</a></li>
+      <li><a href="/login">Login</a></li>
+      <li><a href="/register">Register</a></li>
     </ul>
   </nav>
 
   <main>
-    <h1>Reservations</h1>
-    <button onclick="loadReservations()">Load Reservations</button>
-    <ul id="reservations"></ul>
+    <h1>Reservation List</h1>
+    <table id="reservationsTable">
+      <thead>
+        <tr>
+          <th onclick="sortTable(0)">Reservation ID</th>
+          <th onclick="sortTable(1)">Players</th>
+          <th onclick="sortTable(2)">Start Time</th>
+          <th onclick="sortTable(3)">Duration</th>
+          <th onclick="sortTable(4)">Table</th>
+        </tr>
+      </thead>
+      <tbody id="reservationsBody">
+      </tbody>
+    </table>
   </main>
 
   <script>
     async function loadReservations() {
-      const res = await fetch('/api/reservations');
-      const data = await res.json();
-      const list = document.getElementById('reservations');
-      list.innerHTML = '';
-      data.forEach(r => {
-        const item = document.createElement('li');
-        item.textContent = `Reservation #${r.reservation_id}, Table ${r.table_assigned}, Players: ${r.num_players}`;
-        list.appendChild(item);
-      });
+      try {
+        const res = await fetch('http://localhost:8080/api/reservations');
+
+        if (!res.ok) {
+          const error = await res.json();
+          console.error('API Error:', error);
+          throw new Error(`API error: ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error('Unexpected API response: not an array');
+        }
+
+        const tbody = document.getElementById('reservationsBody');
+        tbody.innerHTML = '';
+        data.forEach(r => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${r.reservation_id}</td>
+            <td>${r.num_players}</td>
+            <td>${new Date(r.start_time).toLocaleString()}</td>
+            <td>${r.duration} mins</td>
+            <td>${r.table_assigned}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Failed to load reservations:', error);
+        const tbody = document.getElementById('reservationsBody');
+        tbody.innerHTML = `<tr><td colspan="5">Failed to load reservations</td></tr>`;
+      }
     }
+
+    function sortTable(colIndex) {
+      const table = document.getElementById("reservationsTable");
+      const rows = Array.from(table.rows).slice(1);
+      const asc = table.getAttribute("data-sort-dir") !== "asc";
+      table.setAttribute("data-sort-dir", asc ? "asc" : "desc");
+      rows.sort((a, b) => {
+        const cellA = a.cells[colIndex].innerText;
+        const cellB = b.cells[colIndex].innerText;
+        return asc
+          ? cellA.localeCompare(cellB, undefined, { numeric: true })
+          : cellB.localeCompare(cellA, undefined, { numeric: true });
+      });
+      const tbody = table.tBodies[0];
+      rows.forEach(row => tbody.appendChild(row));
+    }
+
+    window.onload = loadReservations;
   </script>
 </body>
 </html>

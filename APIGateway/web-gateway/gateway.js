@@ -4,12 +4,17 @@ const axios = require('axios');
 const logger = require('./logger');
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
+const cors = require('cors'); 
 const path = require('path');
+
 const app = express();
+app.use(cors()); 
 app.use(bodyParser.json());
-const BOOKING_URL = 'http://localhost:5050';
+
+const BOOKING_URL = 'http://bookingservice:5050';
 const BATTLE_URL = 'http://battle-simulation:7000';
 const PROTO_PATH = path.join(__dirname, 'protos', 'player.proto');
+
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   keepCase: true,
   longs: String,
@@ -17,6 +22,7 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   defaults: true,
   oneofs: true,
 });
+
 const playerProto = grpc.loadPackageDefinition(packageDefinition).player;
 
 const playerClient = new playerProto.PlayerService(
@@ -83,7 +89,7 @@ function grpcResponse(res) {
 
 async function proxyToBooking(req, res) {
   try {
-    const url = `${BOOKING_URL}${req.originalUrl.replace('/api', '')}`;
+    const url = `${BOOKING_URL}/booking${req.originalUrl.replace('/api', '')}`;
     const response = await axios({
       method: req.method,
       url,

@@ -39,4 +39,4 @@ if __name__ == '__main__':
     port = 5050
     logger.info(f"Starting BookingService on http://localhost:{port}")
     logger.info(f"Swagger docs available at http://localhost:{port}/apidocs")
-    app.run(debug=True, port=port)
+    app.run(host="0.0.0.0", debug=True, port=port)

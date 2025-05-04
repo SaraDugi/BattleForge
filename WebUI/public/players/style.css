@@ -1,18 +1,225 @@
-.action-bar {
-    margin: 1rem 0;
-    text-align: center;
+body, h1, ul, li {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #1a1a1a;
+  color: #f0f0f0;
+  line-height: 1.6;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+nav {
+  background-color: #2c2c2c;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.nav {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.nav li a {
+  text-decoration: none;
+  color: #f0f0f0;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.nav li a:hover {
+  background-color: #444;
+}
+
+main {
+  max-width: 100%;
+  margin: auto;
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 1rem;
+  color: #ffcc00;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #2a2a2a;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
+
+thead {
+  background-color: #333;
+}
+
+thead th {
+  padding: 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  color: #ffcc00;
+  font-size: 0.95rem;
+  user-select: none;
+}
+
+thead th:hover {
+  background-color: #444;
+}
+
+tbody td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #444;
+  text-align: left;
+}
+
+tbody tr:hover {
+  background-color: #3a3a3a;
+}
+
+tbody img {
+  max-height: 40px;
+  border-radius: 5px;
+}
+
+@media screen and (max-width: 768px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
   }
-  
-  .data-list {
-    list-style-type: none;
-    padding: 0;
+
+  thead {
+    display: none;
   }
-  
-  .data-list li {
-    background: #ecf0f1;
-    margin: 0.5rem 0;
+
+  tr {
+    margin-bottom: 1rem;
+    background: #2a2a2a;
     padding: 1rem;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    line-height: 1.6;
-  }  
+    border-radius: 10px;
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border: none;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: #ccc;
+  }
+
+  tbody img {
+    max-width: 100px;
+    height: auto;
+  }
+}
+
+#playersTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #262626;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+  table-layout: fixed;
+  word-wrap: break-word;
+}
+
+#playersTable thead {
+  background-color: #1f1f1f;
+}
+
+#playersTable thead th {
+  padding: 12px;
+  color: #ffcc00;
+  font-size: 0.9rem;
+  text-align: left;
+  border-bottom: 2px solid #444;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#playersTable thead th:hover {
+  background-color: #333;
+}
+
+#playersTable tbody tr {
+  border-bottom: 1px solid #333;
+  transition: background-color 0.2s ease;
+}
+
+#playersTable tbody tr:nth-child(even) {
+  background-color: #2e2e2e;
+}
+
+#playersTable tbody tr:hover {
+  background-color: #3d3d3d;
+}
+
+#playersTable td {
+  padding: 10px;
+  color: #e0e0e0;
+  vertical-align: middle;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+#playersTable td img {
+  max-height: 40px;
+  border-radius: 4px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+  object-fit: cover;
+}
+
+@media (max-width: 900px) {
+  #playersTable,
+  #playersTable thead,
+  #playersTable tbody,
+  #playersTable th,
+  #playersTable td,
+  #playersTable tr {
+    display: block;
+  }
+
+  #playersTable thead {
+    display: none;
+  }
+
+  #playersTable tr {
+    margin-bottom: 1.2rem;
+    background: #2e2e2e;
+    padding: 0.75rem;
+    border-radius: 8px;
+  }
+
+  #playersTable td {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: none;
+    white-space: normal;
+  }
+
+  #playersTable td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    flex: 0 0 40%;
+    color: #ccc;
+    padding-right: 0.5rem;
+  }
+}

@@ -6,18 +6,15 @@ const axios = require('axios');
 const app = express();
 app.use(bodyParser.json());
 
-// Serve static micro frontends
-app.use('/players', express.static(path.join(__dirname, 'players')));
+app.use('/player', express.static(path.join(__dirname, 'players')));
 app.use('/reservations', express.static(path.join(__dirname, 'booking')));
 app.use('/battles', express.static(path.join(__dirname, 'battles')));
 app.use('/login', express.static(path.join(__dirname, 'login')));
 app.use('/register', express.static(path.join(__dirname, 'register')));
 
-// Default static for root (homepage/index)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Proxy API requests to the gateway
-const API_GATEWAY = process.env.API_GATEWAY || 'http://localhost:7000';
+const API_GATEWAY = process.env.API_GATEWAY || 'http://localhost:8080';
 app.use('/api', async (req, res) => {
   try {
     const url = `${API_GATEWAY}${req.originalUrl}`;

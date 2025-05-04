@@ -4,34 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Players | BattleForge</title>
-  <link rel="stylesheet" href="/style.css" />
-  <style>
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
-
-    th, td {
-      padding: 0.75rem 1rem;
-      border: 1px solid #ddd;
-      text-align: left;
-    }
-
-    th {
-      background-color: #3498db;
-      color: white;
-      cursor: pointer;
-    }
-
-    th:hover {
-      background-color: #2980b9;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f2f2f2;
-    }
-  </style>
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <nav>
@@ -51,34 +24,88 @@
       <thead>
         <tr>
           <th onclick="sortTable(0)">ID</th>
-          <th onclick="sortTable(1)">Nickname</th>
-          <th onclick="sortTable(2)">Email</th>
-          <th onclick="sortTable(3)">Score</th>
+          <th>First</th>
+          <th>Last</th>
+          <th>Nickname</th>
+          <th>Email</th>
+          <th>Faction</th>
+          <th>ELO</th>
+          <th>Wins</th>
+          <th>Losses</th>
+          <th>Tournaments</th>
+          <th>Score</th>
+          <th>Achievements</th>
+          <th>Team</th>
         </tr>
       </thead>
       <tbody id="playersBody">
-        <!-- Players will be populated here -->
       </tbody>
     </table>
   </main>
 
   <script>
     async function loadPlayers() {
-      const response = await fetch('/api/player');
-      const data = await response.json();
-      const tbody = document.getElementById('playersBody');
-      tbody.innerHTML = '';
+      try {
+        const res = await fetch('http://localhost:8080/api/player');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        console.log('Fetched players:', data);
 
-      (data.players || []).forEach(player => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${player.id}</td>
-          <td>${player.nickname}</td>
-          <td>${player.email}</td>
-          <td>${player.score}</td>
-        `;
-        tbody.appendChild(row);
-      });
+        const tbody = document.getElementById('playersBody');
+        tbody.innerHTML = '';
+
+        const players = data.players || [];
+        if (players.length === 0) {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td colspan="13" style="text-align:center;">No players found</td>`;
+          tbody.appendChild(row);
+          return;
+        }
+
+        players.forEach(p => {
+          let achievements = '-';
+          try {
+            const parsed = JSON.parse(p.achievements);
+            achievements = Array.isArray(parsed)
+              ? parsed.map(a => {
+                  if (typeof a === 'string') {
+                    try {
+                      const obj = JSON.parse(a);
+                      return obj.medal ?? a;
+                    } catch {
+                      return a;
+                    }
+                  }
+                  return a.medal ?? '-';
+                }).join(', ')
+              : '-';
+          } catch (e) {
+            console.warn('Failed to parse achievements:', e);
+          }
+
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${p.id ?? '-'}</td>
+            <td>${p.firstName || '-'}</td>
+            <td>${p.lastName || '-'}</td>
+            <td>${p.nickname || '-'}</td>
+            <td>${p.email || '-'}</td>
+            <td>${p.mainFaction || '-'}</td>
+            <td>${p.eloRating ?? '-'}</td>
+            <td>${p.wins ?? '-'}</td>
+            <td>${p.losses ?? '-'}</td>
+            <td>${p.tournamentsParticipated ?? '-'}</td>
+            <td>${p.score ?? '-'}</td>
+            <td>${achievements}</td>
+            <td>${p.teamId ?? '-'}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Failed to load players:', error);
+        const tbody = document.getElementById('playersBody');
+        tbody.innerHTML = `<tr><td colspan="13" style="color:red; text-align:center;">Error loading players</td></tr>`;
+      }
     }
 
     function sortTable(colIndex) {
@@ -90,7 +117,6 @@
       rows.sort((a, b) => {
         const cellA = a.cells[colIndex].innerText;
         const cellB = b.cells[colIndex].innerText;
-
         return asc
           ? cellA.localeCompare(cellB, undefined, { numeric: true })
           : cellB.localeCompare(cellA, undefined, { numeric: true });
@@ -100,7 +126,6 @@
       rows.forEach(row => tbody.appendChild(row));
     }
 
-    // Load on page load
     window.onload = loadPlayers;
   </script>
 </body>
