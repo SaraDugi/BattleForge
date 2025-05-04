@@ -56,7 +56,17 @@ app.post('/api/player', (req, res) => {
 });
 
 app.get('/api/player', (req, res) => playerClient.FindPlayers(req.query, grpcResponse(res)));
-app.post('/api/player/login', (req, res) => playerClient.Login(req.body, grpcResponse(res)));
+app.post('/api/player/login', (req, res) => {
+  playerClient.Login(req.body, (err, result) => {
+    if (err) return res.status(401).json({ error: err.message });
+    return res.json({
+      message: result.message,
+      playerId: result.userId,         
+      nickname: result.nickname || ""
+    });
+  });
+});
+
 app.patch('/api/player/:id', (req, res) => {
   const id = parseInt(req.params.id);
   const updates = req.body;

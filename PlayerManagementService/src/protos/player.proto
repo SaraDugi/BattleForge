@@ -51,6 +51,8 @@ message LoginRequest {
 message LoginResponse {
   string token = 1;
   string message = 2;
+  int32 userId = 3;
+  string nickname = 4;
 }
 
 service PlayerService {
