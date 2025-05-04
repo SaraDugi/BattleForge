@@ -2,30 +2,129 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Register | BattleForge</title>
   <link rel="stylesheet" href="./style.css" />
+  <style>
+    form {
+      background-color: #2c2c2c;
+      max-width: 400px;
+      margin: 2rem auto;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 1rem;
+      color: #ccc;
+      font-size: 0.95rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border-radius: 5px;
+      border: none;
+      background-color: #1f1f1f;
+      color: #f0f0f0;
+    }
+
+    input:focus {
+      outline: 2px solid #ffcc00;
+      background-color: #2a2a2a;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #ffcc00;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background-color: #e6b800;
+    }
+
+    #registerStatus {
+      text-align: center;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+  </style>
+  <script>
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? match[2] : null;
+    }
+
+    function updateNavBar() {
+      const authLinks = document.getElementById('authLinks');
+      const email = localStorage.getItem('userEmail');
+
+      if (email) {
+        authLinks.innerHTML = `
+        <li><a href="/profile/profile.html">Profile (${email})</a></li>
+          <li><a href="#" onclick="logout()">Logout</a></li>
+        `;
+      } else {
+        authLinks.innerHTML = `
+          <li><a href="/login">Login</a></li>
+          <li><a href="/register">Register</a></li>
+        `;
+      }
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = '/login';
+    }
+
+    window.onload = updateNavBar;
+  </script>
 </head>
 <body>
   <nav>
-    <ul class="nav">
+    <ul class="nav" id="navLinks">
       <li><a href="/">Home</a></li>
-      <li><a href="/players.html">Players</a></li>
-      <li><a href="/reservations.html">Reservations</a></li>
-      <li><a href="/battles.html">Battles</a></li>
-      <li><a href="/login.html">Login</a></li>
-      <li><a href="/register.html">Register</a></li>
+      <li><a href="/players">Players</a></li>
+      <li><a href="/booking">Reservations</a></li>
+      <li><a href="/battles">Battles</a></li>
+      <span id="authLinks">
+        <li><a href="/login">Login</a></li>
+        <li><a href="/register">Register</a></li>
+      </span>
     </ul>
   </nav>
 
   <main>
     <h1>Register</h1>
     <form id="registerForm">
-      <label>First Name: <input type="text" name="firstName" required></label><br>
-      <label>Last Name: <input type="text" name="lastName" required></label><br>
-      <label>Nickname: <input type="text" name="nickname" required></label><br>
-      <label>Email: <input type="email" name="email" required></label><br>
-      <label>Password: <input type="password" name="accountPassword" required></label><br>
+      <label>First Name:
+        <input type="text" name="firstName" required />
+      </label>
+      <label>Last Name:
+        <input type="text" name="lastName" required />
+      </label>
+      <label>Nickname:
+        <input type="text" name="nickname" required />
+      </label>
+      <label>Email:
+        <input type="email" name="email" required />
+      </label>
+      <label>Password:
+        <input type="password" name="accountPassword" required />
+      </label>
       <button type="submit">Register</button>
     </form>
     <p id="registerStatus"></p>
@@ -34,21 +133,49 @@
   <script>
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const form = e.target;
+      const formData = new FormData(e.target);
+
       const body = {
-        firstName: form.firstName.value,
-        lastName: form.lastName.value,
-        nickname: form.nickname.value,
-        email: form.email.value,
-        accountPassword: form.accountPassword.value
+        firstName: formData.get("firstName") || "",
+        lastName: formData.get("lastName") || "",
+        nickname: formData.get("nickname") || "",
+        email: formData.get("email") || "",
+        accountPassword: formData.get("accountPassword") || "",
+        mainFaction: "Unaligned",
+        score: 0,
+        eloRating: 1000.0,
+        wins: 0,
+        losses: 0,
+        tournamentsParticipated: 0,
+        achievements: JSON.stringify([]),
+        profilePic: "",
+        banner: "",
+        teamId: 0
       };
-      const res = await fetch('/api/player', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      const data = await res.json();
-      document.getElementById('registerStatus').textContent = data.id ? 'Registration successful!' : data.error;
+
+      try {
+        const res = await fetch('http://localhost:8080/api/player', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+        const statusEl = document.getElementById('registerStatus');
+
+        if (res.ok && data.id) {
+          statusEl.textContent = 'Registration successful!';
+          statusEl.style.color = 'limegreen';
+          e.target.reset();
+        } else {
+          statusEl.textContent = data.error || 'Registration failed.';
+          statusEl.style.color = 'tomato';
+        }
+      } catch (err) {
+        const statusEl = document.getElementById('registerStatus');
+        statusEl.textContent = 'Network error. Please try again.';
+        statusEl.style.color = 'tomato';
+      }
     });
   </script>
 </body>

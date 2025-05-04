@@ -8,41 +8,106 @@
 </head>
 <body>
   <nav>
-    <ul class="nav">
+    <ul class="nav" id="navLinks">
       <li><a href="/">Home</a></li>
-      <li><a href="/players.html">Players</a></li>
-      <li><a href="/reservations.html">Reservations</a></li>
-      <li><a href="/battles.html">Battles</a></li>
-      <li><a href="/login.html">Login</a></li>
-      <li><a href="/register.html">Register</a></li>
+      <li><a href="/players">Players</a></li>
+      <li><a href="/booking">Reservations</a></li>
+      <li><a href="/battles">Battles</a></li>
+      <span id="authLinks">
+        <!-- Login/Register links or Profile/Logout will be injected here -->
+      </span>
     </ul>
   </nav>
 
   <main>
     <h1>Login</h1>
     <form id="loginForm">
-      <label>Email: <input type="email" name="email" required></label><br>
-      <label>Password: <input type="password" name="password" required></label><br>
+      <label>Email: <input type="email" name="email" required /></label>
+      <label>Password: <input type="password" name="password" required /></label>
       <button type="submit">Login</button>
     </form>
     <p id="loginStatus"></p>
   </main>
 
   <script>
+    function updateNavBar() {
+      const authLinks = document.getElementById('authLinks');
+      const email = localStorage.getItem('userEmail');
+
+      if (email) {
+        authLinks.innerHTML = `
+        <li><a href="/profile/profile.html">Profile (${email})</a></li>
+          <li><a href="#" onclick="logout()">Logout</a></li>
+        `;
+      } else {
+        authLinks.innerHTML = `
+          <li><a href="/login">Login</a></li>
+          <li><a href="/register">Register</a></li>
+        `;
+      }
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = '/login';
+    }
+
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = '/login';
+    }
+
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const form = e.target;
-      const res = await fetch('/api/player/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: form.email.value,
-          password: form.password.value
-        })
-      });
-      const data = await res.json();
-      document.getElementById('loginStatus').textContent = data.message || data.error;
+      const status = document.getElementById('loginStatus');
+
+      try {
+        const res = await fetch('http://localhost:8080/api/player/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: form.email.value,
+            password: form.password.value
+          })
+        });
+
+        const data = await res.json();
+        console.log("Login response:", data);
+
+        if (res.ok && data.message === 'Login successful') {
+          status.textContent = 'Login successful!';
+          status.style.color = 'limegreen';
+
+          localStorage.setItem('userEmail', form.email.value);
+          localStorage.setItem('playerId', data.player.id);
+
+          setTimeout(() => {
+            window.location.href = '/index.html';
+          }, 1000);
+        } else {
+          status.textContent = data.error || 'Invalid credentials';
+          status.style.color = 'tomato';
+          console.warn("Login failed:", data.error);
+        }
+      } catch (err) {
+        status.textContent = 'Network error. Please try again.';
+        status.style.color = 'tomato';
+        console.error("Login error:", err);
+      }
     });
+
+    window.onload = () => {
+      updateNavBar();
+
+      const loggedIn = localStorage.getItem('userEmail');
+      const path = window.location.pathname;
+
+      if (loggedIn && (path === '/login' || path === '/register')) {
+        window.location.href = '/index.html';
+      }
+    };
   </script>
 </body>
 </html>

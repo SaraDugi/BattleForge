@@ -6,16 +6,51 @@
   <title>BattleForge Portal</title>
   <link rel="stylesheet" href="/style.css" />
 </head>
+
+<script>
+  function updateNavBar() {
+    const authLinks = document.getElementById('authLinks');
+    const email = localStorage.getItem('userEmail');
+
+    if (email) {
+      authLinks.innerHTML = `
+        <li><a href="/profile/profile.html">Profile (${email})</a></li>
+        <li><a href="#" onclick="logout()">Logout</a></li>
+      `;
+    } else {
+      authLinks.innerHTML = `
+        <li><a href="/login">Login</a></li>
+        <li><a href="/register">Register</a></li>
+      `;
+    }
+  }
+
+  function logout() {
+    localStorage.clear();
+    window.location.href = '/login';
+  }
+
+  window.onload = function () {
+    updateNavBar();
+    if (typeof loadPlayers === 'function') loadPlayers();
+    if (typeof loadReservations === 'function') loadReservations();
+  };
+</script>
+
 <body>
   <nav>
-    <ul class="nav">
+    <ul class="nav" id="navLinks">
+      <li><a href="/">Home</a></li>
       <li><a href="/players">Players</a></li>
       <li><a href="/booking">Reservations</a></li>
       <li><a href="/battles">Battles</a></li>
-      <li><a href="/login">Login</a></li>
-      <li><a href="/register">Register</a></li>
+      <span id="authLinks">
+        <li><a href="/login">Login</a></li>
+        <li><a href="/register">Register</a></li>
+      </span>
     </ul>
   </nav>
+  
   <main>
     <h1>Welcome to BattleForge</h1>
     <p>Select a module from the navigation above to begin.</p>

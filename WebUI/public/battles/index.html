@@ -5,36 +5,152 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Battles | BattleForge</title>
   <link rel="stylesheet" href="./style.css" />
+  <style>
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal {
+      background: #1c1c1c;
+      color: white;
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    .modal h2 { margin-top: 0; }
+    .modal input, .modal textarea, .modal select {
+      width: 100%; padding: 0.5rem; margin-bottom: 1rem;
+      border-radius: 5px; border: none; background: #333; color: white;
+    }
+    .modal button {
+      background: #ffcc00; color: black; border: none;
+      padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; font-weight: bold;
+    }
+    .modal-close {
+      float: right; cursor: pointer; font-size: 1.2rem; color: #aaa;
+    }
+  </style>
 </head>
 <body>
   <nav>
-    <ul class="nav">
+    <ul class="nav" id="navLinks">
       <li><a href="/">Home</a></li>
       <li><a href="/players">Players</a></li>
-      <li><a href="/reservations">Reservations</a></li>
+      <li><a href="/booking">Reservations</a></li>
       <li><a href="/battles">Battles</a></li>
-      <li><a href="/login">Login</a></li>
-      <li><a href="/register">Register</a></li>
+      <span id="authLinks"></span>
     </ul>
   </nav>
 
   <main>
     <h1>Battle History</h1>
+    <button onclick="openModal('create')">Create Battle</button>
     <table id="battlesTable">
       <thead>
         <tr>
           <th onclick="sortTable(0)">Battle ID</th>
-          <th onclick="sortTable(1)">Player 1</th>
-          <th onclick="sortTable(2)">Player 2</th>
-          <th onclick="sortTable(3)">Status</th>
+          <th>Player 1</th>
+          <th>Player 2</th>
+          <th>Status</th>
+          <th>Actions</th>
         </tr>
       </thead>
-      <tbody id="battlesBody">
-      </tbody>
+      <tbody id="battlesBody"></tbody>
     </table>
   </main>
 
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modalContent">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
   <script>
+    function updateNavBar() {
+      const authLinks = document.getElementById('authLinks');
+      const email = localStorage.getItem('userEmail');
+
+      if (email) {
+        authLinks.innerHTML = `
+        <li><a href="/profile/profile.html">Profile (${email})</a></li>
+          <li><a href="#" onclick="logout()">Logout</a></li>
+        `;
+      } else {
+        authLinks.innerHTML = `
+          <li><a href="/login">Login</a></li>
+          <li><a href="/register">Register</a></li>
+        `;
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userEmail');
+      window.location.href = '/login';
+    }
+
+    function openModal(type, battleId = null) {
+      const modalOverlay = document.getElementById('modalOverlay');
+      const modalBody = document.getElementById('modalBody');
+      modalOverlay.style.display = 'flex';
+      switch (type) {
+        case 'create':
+          modalBody.innerHTML = `
+            <h2>Create Battle</h2>
+            <input id="p1" placeholder="Player 1 ID">
+            <input id="p2" placeholder="Player 2 ID">
+            <button onclick="submitCreateBattle()">Submit</button>`;
+          break;
+        case 'view':
+          getBattle(battleId, true);
+          break;
+        case 'status':
+          modalBody.innerHTML = `
+            <h2>Set Status</h2>
+            <select id="newStatus">
+              <option>PENDING</option>
+              <option>IN_PROGRESS</option>
+              <option>COMPLETED</option>
+            </select>
+            <button onclick="submitSetStatus('${battleId}')">Update</button>`;
+          break;
+        case 'winner':
+          modalBody.innerHTML = `
+            <h2>Set Winner</h2>
+            <input id="winnerId" placeholder="Winner ID">
+            <button onclick="submitSetWinner('${battleId}')">Submit</button>`;
+          break;
+        case 'event':
+          modalBody.innerHTML = `
+            <h2>Add Event</h2>
+            <input id="eventType" placeholder="Type">
+            <textarea id="eventDetail" placeholder="Details"></textarea>
+            <button onclick="submitAddEvent('${battleId}')">Submit</button>`;
+          break;
+        case 'events':
+          getEvents(battleId, true);
+          break;
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').style.display = 'none';
+    }
+
+    window.onload = function () {
+      updateNavBar();
+      loadBattles();
+    };
+
     async function loadBattles() {
       try {
         const res = await fetch('/api/battles');
@@ -48,11 +164,105 @@
             <td>${b.player1Id}</td>
             <td>${b.player2Id}</td>
             <td>${b.battleStatus}</td>
-          `;
+            <td>
+              <button onclick="openModal('view','${b.id}')">View</button>
+              <button onclick="openModal('status','${b.id}')">Set Status</button>
+              <button onclick="openModal('winner','${b.id}')">Set Winner</button>
+              <button onclick="openModal('event','${b.id}')">Add Event</button>
+              <button onclick="openModal('events','${b.id}')">Show Events</button>
+            </td>`;
           tbody.appendChild(row);
         });
-      } catch (error) {
-        console.error('Failed to load battles:', error);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function submitCreateBattle() {
+      const body = {
+        player1Id: +document.getElementById('p1').value,
+        player2Id: +document.getElementById('p2').value
+      };
+      const res = await fetch('/api/battles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      await res.json();
+      closeModal();
+      loadBattles();
+    }
+
+    async function getBattle(id, modal = false) {
+      const res = await fetch(`/api/battles/${id}`);
+      const data = await res.json();
+      if (modal) {
+        const html = `
+          <h2>Battle #${data.id}</h2>
+          <p><strong>Player 1:</strong> ${data.player1Id}</p>
+          <p><strong>Player 2:</strong> ${data.player2Id}</p>
+          <p><strong>Status:</strong> ${data.battleStatus}</p>
+          <p><strong>Winner:</strong> ${data.winnerId ?? '-'}</p>
+          <p><strong>Start Time:</strong> ${new Date(data.startTime).toLocaleString()}</p>
+          <p><strong>End Time:</strong> ${data.endTime ? new Date(data.endTime).toLocaleString() : '-'}</p>
+          <p><strong>Created:</strong> ${new Date(data.createdAt).toLocaleString()}</p>`;
+        document.getElementById('modalBody').innerHTML = html;
+      }
+    }
+
+    async function submitSetStatus(id) {
+      const body = { status: document.getElementById('newStatus').value };
+      await fetch(`/api/battles/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      closeModal();
+      loadBattles();
+    }
+
+    async function submitSetWinner(id) {
+      const body = { winnerId: +document.getElementById('winnerId').value };
+      await fetch(`/api/battles/${id}/winner`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      closeModal();
+      loadBattles();
+    }
+
+    async function submitAddEvent(id) {
+      const body = {
+        type: document.getElementById('eventType').value,
+        detail: document.getElementById('eventDetail').value
+      };
+      await fetch(`/api/battles/${id}/events`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      closeModal();
+    }
+
+    async function getEvents(id, modal = false) {
+      const res = await fetch(`/api/battles/${id}/events`);
+      const data = await res.json();
+      if (modal) {
+        let html = `<h2>Events for Battle #${id}</h2>`;
+        if (data.length === 0) {
+          html += '<p>No events found.</p>';
+        } else {
+          html += '<ul>';
+          data.forEach(evt => {
+            const type = evt.eventType ?? 'N/A';
+            const desc = evt.description ?? 'No description';
+            const time = evt.eventTime ? new Date(evt.eventTime).toLocaleString() : 'Unknown time';
+            html += `<li><strong>${type}</strong> - ${desc} <br><em>${time}</em></li>`;
+          });
+          html += '</ul>';
+        }
+        document.getElementById('modalBody').innerHTML = html;
       }
     }
 
@@ -61,18 +271,11 @@
       const rows = Array.from(table.rows).slice(1);
       const asc = table.getAttribute("data-sort-dir") !== "asc";
       table.setAttribute("data-sort-dir", asc ? "asc" : "desc");
-      rows.sort((a, b) => {
-        const cellA = a.cells[colIndex].innerText;
-        const cellB = b.cells[colIndex].innerText;
-        return asc
-          ? cellA.localeCompare(cellB, undefined, { numeric: true })
-          : cellB.localeCompare(cellA, undefined, { numeric: true });
-      });
-      const tbody = table.tBodies[0];
-      rows.forEach(row => tbody.appendChild(row));
+      rows.sort((a, b) =>
+        a.cells[colIndex].innerText.localeCompare(b.cells[colIndex].innerText, undefined, { numeric: true }) * (asc ? 1 : -1)
+      );
+      rows.forEach(row => table.tBodies[0].appendChild(row));
     }
-
-    window.onload = loadBattles;
   </script>
 </body>
 </html>

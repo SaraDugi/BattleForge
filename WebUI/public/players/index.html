@@ -2,19 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Players | BattleForge</title>
-  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="./style.css"/>
 </head>
 <body>
   <nav>
-    <ul class="nav">
+    <ul class="nav" id="navLinks">
       <li><a href="/">Home</a></li>
       <li><a href="/players">Players</a></li>
-      <li><a href="/reservations">Reservations</a></li>
+      <li><a href="/booking">Reservations</a></li>
       <li><a href="/battles">Battles</a></li>
-      <li><a href="/login">Login</a></li>
-      <li><a href="/register">Register</a></li>
+      <span id="authLinks"></span>
     </ul>
   </nav>
 
@@ -38,51 +37,158 @@
           <th>Team</th>
         </tr>
       </thead>
-      <tbody id="playersBody">
-      </tbody>
+      <tbody id="playersBody"></tbody>
     </table>
   </main>
 
+  <!-- Popup Modal -->
+  <div id="popupModal">
+    <div id="popupMessage"></div>
+    <form id="popupForm" style="margin-top: 10px;"></form>
+    <button onclick="hidePopup()">Close</button>
+  </div>
+
+  <!-- Context Menu -->
+  <div id="contextMenu">
+    <ul>
+      <li onclick="openEdit()">Edit Player</li>
+      <li onclick="confirmDelete()">Delete Player</li>
+      <li onclick="addAchievement()">Add Achievement</li>
+    </ul>
+  </div>
+
+  <script src="/scripts/authUtils.js"></script>
   <script>
+    window.onload = function () {
+  const authLinks = document.getElementById('authLinks');
+  const email = localStorage.getItem('userEmail');
+
+  if (email) {
+    authLinks.innerHTML = `
+        <li><a href="/profile/profile.html">Profile (${email})</a></li>
+      <li><a href="#" onclick="logout()">Logout</a></li>
+    `;
+  } else {
+    authLinks.innerHTML = `
+      <li><a href="/login">Login</a></li>
+      <li><a href="/register">Register</a></li>
+    `;
+  }
+
+  if (typeof loadPlayers === 'function') loadPlayers();
+  if (typeof loadReservations === 'function') loadReservations();
+};
+
+    function showPopup(message, isError = false, withForm = false) {
+      const modal = document.getElementById("popupModal");
+      const msg = document.getElementById("popupMessage");
+      msg.innerText = message;
+      modal.className = isError ? "error" : "success";
+      document.getElementById("popupForm").style.display = withForm ? 'block' : 'none';
+      modal.style.display = "block";
+    }
+
+    function hidePopup() {
+      document.getElementById("popupModal").style.display = "none";
+      document.getElementById("popupForm").innerHTML = '';
+    }
+
+    function showContextMenu(e, player) {
+      e.preventDefault();
+      currentPlayer = player;
+      const menu = document.getElementById("contextMenu");
+      menu.style.left = e.pageX + "px";
+      menu.style.top = e.pageY + "px";
+      menu.style.display = "block";
+    }
+
+    document.addEventListener("click", () => {
+      document.getElementById("contextMenu").style.display = "none";
+    });
+
+    function confirmDelete() {
+      if (!currentPlayer) return;
+      if (!confirm(`Delete player ID ${currentPlayer.id}?`)) return;
+      fetch(`http://localhost:8080/api/player/${currentPlayer.id}`, {
+        method: "DELETE"
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Delete failed");
+        showPopup("Player deleted.");
+        loadPlayers();
+      })
+      .catch(err => showPopup(err.message, true));
+    }
+
+    function openEdit() {
+      if (!currentPlayer) return;
+      const form = document.getElementById("popupForm");
+      form.innerHTML = `
+        <input name="nickname" placeholder="Nickname" value="${currentPlayer.nickname || ''}" />
+        <input name="email" placeholder="Email" value="${currentPlayer.email || ''}" />
+        <input name="mainFaction" placeholder="Faction" value="${currentPlayer.mainFaction || ''}" />
+        <input name="score" type="number" placeholder="Score" value="${currentPlayer.score || 0}" />
+        <button type="submit">Save</button>
+      `;
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const data = {
+          nickname: form.nickname.value,
+          email: form.email.value,
+          mainFaction: form.mainFaction.value,
+          score: parseInt(form.score.value) || 0
+        };
+        try {
+          const res = await fetch(`http://localhost:8080/api/player/${currentPlayer.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+          });
+          if (!res.ok) throw new Error("Update failed");
+          showPopup("Player updated successfully.");
+          loadPlayers();
+        } catch (err) {
+          showPopup(err.message, true);
+        }
+      };
+      showPopup("Edit Player", false, true);
+    }
+
+    function addAchievement() {
+      if (!currentPlayer) return;
+      const form = document.getElementById("popupForm");
+      form.innerHTML = `
+        <input name="achievement" placeholder="Achievement (JSON or string)" />
+        <button type="submit">Add</button>
+      `;
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const achievement = form.achievement.value;
+        try {
+          const res = await fetch(`http://localhost:8080/api/player/${currentPlayer.id}/achievement`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ achievement })
+          });
+          if (!res.ok) throw new Error("Add failed");
+          showPopup("Achievement added.");
+          loadPlayers();
+        } catch (err) {
+          showPopup(err.message, true);
+        }
+      };
+      showPopup("Add Achievement", false, true);
+    }
+
     async function loadPlayers() {
       try {
         const res = await fetch('http://localhost:8080/api/player');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        console.log('Fetched players:', data);
-
         const tbody = document.getElementById('playersBody');
         tbody.innerHTML = '';
 
-        const players = data.players || [];
-        if (players.length === 0) {
-          const row = document.createElement('tr');
-          row.innerHTML = `<td colspan="13" style="text-align:center;">No players found</td>`;
-          tbody.appendChild(row);
-          return;
-        }
-
-        players.forEach(p => {
-          let achievements = '-';
-          try {
-            const parsed = JSON.parse(p.achievements);
-            achievements = Array.isArray(parsed)
-              ? parsed.map(a => {
-                  if (typeof a === 'string') {
-                    try {
-                      const obj = JSON.parse(a);
-                      return obj.medal ?? a;
-                    } catch {
-                      return a;
-                    }
-                  }
-                  return a.medal ?? '-';
-                }).join(', ')
-              : '-';
-          } catch (e) {
-            console.warn('Failed to parse achievements:', e);
-          }
-
+        (data.players || []).forEach(p => {
           const row = document.createElement('tr');
           row.innerHTML = `
             <td>${p.id ?? '-'}</td>
@@ -96,15 +202,26 @@
             <td>${p.losses ?? '-'}</td>
             <td>${p.tournamentsParticipated ?? '-'}</td>
             <td>${p.score ?? '-'}</td>
-            <td>${achievements}</td>
+            <td>${formatAchievements(p.achievements)}</td>
             <td>${p.teamId ?? '-'}</td>
           `;
+          row.oncontextmenu = (e) => showContextMenu(e, p);
           tbody.appendChild(row);
         });
-      } catch (error) {
-        console.error('Failed to load players:', error);
-        const tbody = document.getElementById('playersBody');
-        tbody.innerHTML = `<tr><td colspan="13" style="color:red; text-align:center;">Error loading players</td></tr>`;
+      } catch (err) {
+        console.error("Load error:", err);
+        showPopup("Failed to load players", true);
+      }
+    }
+
+    function formatAchievements(raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed)
+          ? parsed.map(a => typeof a === "string" ? a : a.medal ?? "-").join(", ")
+          : "-";
+      } catch {
+        return "-";
       }
     }
 
@@ -125,8 +242,6 @@
       const tbody = table.tBodies[0];
       rows.forEach(row => tbody.appendChild(row));
     }
-
-    window.onload = loadPlayers;
   </script>
 </body>
 </html>

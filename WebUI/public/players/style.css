@@ -223,3 +223,94 @@ tbody img {
     padding-right: 0.5rem;
   }
 }
+
+/* Popup Modal */
+#popupModal {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background-color: #1f1f1f;
+  border: 2px solid #444;
+  padding: 1.5rem;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+  display: none;
+  max-width: 340px;
+  width: 90%;
+  text-align: center;
+  border-radius: 10px;
+  color: #f0f0f0;
+}
+
+#popupModal.success {
+  border-color: #4caf50;
+}
+
+#popupModal.error {
+  border-color: #f44336;
+}
+
+#popupModal button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffcc00;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#popupModal button:hover {
+  background-color: #e6b800;
+}
+
+#popupModal input,
+#popupModal textarea {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  background-color: #2a2a2a;
+  border: 1px solid #555;
+  border-radius: 5px;
+  color: #f0f0f0;
+  font-size: 0.9rem;
+}
+
+#popupModal input:focus,
+#popupModal textarea:focus {
+  outline: none;
+  border-color: #ffcc00;
+}
+
+#contextMenu {
+  position: absolute;
+  background-color: #2c2c2c;
+  border: 1px solid #555;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  display: none;
+  z-index: 2000;
+  min-width: 160px;
+}
+
+#contextMenu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#contextMenu li {
+  padding: 0.75rem 1rem;
+  color: #f0f0f0;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+#contextMenu li:hover {
+  background-color: #444;
+  color: #ffcc00;
+}

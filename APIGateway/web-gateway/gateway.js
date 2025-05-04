@@ -30,7 +30,31 @@ const playerClient = new playerProto.PlayerService(
   grpc.credentials.createInsecure()
 );
 
-app.post('/api/player', (req, res) => playerClient.CreatePlayer(req.body, grpcResponse(res)));
+app.post('/api/player', (req, res) => {
+  const body = req.body;
+
+  const playerData = {
+    id: body.id || 0,
+    firstName: body.firstName || '',
+    lastName: body.lastName || '',
+    nickname: body.nickname,
+    email: body.email,
+    accountPassword: body.accountPassword || '',
+    mainFaction: body.mainFaction || 'Unaligned',
+    eloRating: body.eloRating || 1000,
+    wins: body.wins || 0,
+    losses: body.losses || 0,
+    tournamentsParticipated: body.tournamentsParticipated || 0,
+    achievements: body.achievements || '[]',
+    score: body.score || 0,
+    profilePic: body.profilePic || '',
+    banner: body.banner || '',
+    teamId: body.teamId || 0,
+  };
+  console.log('CreatePlayer request:', playerData);
+  playerClient.CreatePlayer(playerData, grpcResponse(res));
+});
+
 app.get('/api/player', (req, res) => playerClient.FindPlayers(req.query, grpcResponse(res)));
 app.post('/api/player/login', (req, res) => playerClient.Login(req.body, grpcResponse(res)));
 app.patch('/api/player/:id', (req, res) => {
@@ -47,6 +71,10 @@ app.patch('/api/player/:id', (req, res) => {
     return playerClient.UpdateMedia({ id, profilePic: updates.profilePic, banner: updates.banner }, grpcResponse(res));
 
   res.status(400).json({ error: 'No valid update fields provided' });
+});
+app.get('/api/player/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  playerClient.FindPlayers({ id }, grpcResponse(res));
 });
 app.delete('/api/player/:id', (req, res) => playerClient.DeletePlayerById({ id: parseInt(req.params.id) }, grpcResponse(res)));
 app.post('/api/player/:id/achievement', (req, res) => {

@@ -5,21 +5,108 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Reservations | BattleForge</title>
   <link rel="stylesheet" href="./style.css"/>
+  <style>
+    #popupModal {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      background-color: #1f1f1f;
+      border: 2px solid #444;
+      padding: 1.5rem;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+      display: none;
+      max-width: 340px;
+      width: 90%;
+      text-align: center;
+      border-radius: 10px;
+      color: #f0f0f0;
+    }
+
+    #popupModal.success { border-color: #4caf50; }
+    #popupModal.error { border-color: #f44336; }
+
+    #popupModal button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: #ffcc00;
+      color: #1a1a1a;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #popupModal button:hover {
+      background-color: #e6b800;
+    }
+
+    #popupModal input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      background-color: #2a2a2a;
+      border: 1px solid #555;
+      border-radius: 5px;
+      color: #f0f0f0;
+      font-size: 0.9rem;
+    }
+
+    #popupModal input:focus {
+      outline: none;
+      border-color: #ffcc00;
+    }
+
+    #contextMenu {
+      position: absolute;
+      background-color: #2c2c2c;
+      border: 1px solid #555;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      display: none;
+      z-index: 2000;
+      min-width: 160px;
+    }
+
+    #contextMenu ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #contextMenu li {
+      padding: 0.75rem 1rem;
+      color: #f0f0f0;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.2s ease;
+    }
+
+    #contextMenu li:hover {
+      background-color: #444;
+      color: #ffcc00;
+    }
+  </style>
 </head>
 <body>
   <nav>
-    <ul class="nav">
+    <ul class="nav" id="navLinks">
       <li><a href="/">Home</a></li>
       <li><a href="/players">Players</a></li>
-      <li><a href="/reservations">Reservations</a></li>
+      <li><a href="/booking">Reservations</a></li>
       <li><a href="/battles">Battles</a></li>
-      <li><a href="/login">Login</a></li>
-      <li><a href="/register">Register</a></li>
+      <span id="authLinks">
+        <li><a href="/login">Login</a></li>
+        <li><a href="/register">Register</a></li>
+      </span>
     </ul>
-  </nav>
+  </nav>  
 
   <main>
     <h1>Reservation List</h1>
+    <button onclick="openNewReservation()" style="margin-bottom: 10px;">New Reservation</button>
     <table id="reservationsTable">
       <thead>
         <tr>
@@ -30,30 +117,167 @@
           <th onclick="sortTable(4)">Table</th>
         </tr>
       </thead>
-      <tbody id="reservationsBody">
-      </tbody>
+      <tbody id="reservationsBody"></tbody>
     </table>
   </main>
 
+  <div id="contextMenu">
+    <ul>
+      <li onclick="openEditReservation()">Edit Reservation</li>
+      <li onclick="confirmDeleteReservation()">Delete Reservation</li>
+      <li onclick="assignUserToReservation()">Assign User</li>
+    </ul>
+  </div>
+
+  <div id="popupModal">
+    <div id="popupMessage"></div>
+    <form id="popupForm" style="margin-top: 10px;"></form>
+    <button onclick="hidePopup()">Close</button>
+  </div>
+
   <script>
+    function openNewReservation() {
+    const form = document.getElementById("popupForm");
+    form.innerHTML = `
+      <input name="num_players" type="number" placeholder="Players" />
+      <input name="start_time" type="datetime-local" />
+      <input name="duration" type="number" placeholder="Duration (min)" />
+      <input name="table_assigned" placeholder="Table" />
+      <button type="submit">Create</button>
+    `;
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const data = {
+        num_players: parseInt(form.num_players.value),
+        start_time: new Date(form.start_time.value).toISOString(),
+        duration: parseInt(form.duration.value),
+        table_assigned: form.table_assigned.value
+      };
+      try {
+        const res = await fetch("http://localhost:8080/api/reservations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error("Reservation creation failed");
+        showPopup("Reservation created successfully.");
+        loadReservations();
+      } catch (err) {
+        showPopup(err.message, true);
+      }
+    };
+    showPopup("Create New Reservation", false, true);
+  }
+    let currentReservation = null;
+
+    function showPopup(message, isError = false, withForm = false) {
+      const modal = document.getElementById("popupModal");
+      const msg = document.getElementById("popupMessage");
+      msg.innerText = message;
+      modal.className = isError ? "error" : "success";
+      document.getElementById("popupForm").style.display = withForm ? 'block' : 'none';
+      modal.style.display = "block";
+    }
+
+    function hidePopup() {
+      document.getElementById("popupModal").style.display = "none";
+      document.getElementById("popupForm").innerHTML = '';
+    }
+
+    function showContextMenu(e, reservation) {
+      e.preventDefault();
+      currentReservation = reservation;
+      const menu = document.getElementById("contextMenu");
+      menu.style.left = e.pageX + "px";
+      menu.style.top = e.pageY + "px";
+      menu.style.display = "block";
+    }
+
+    document.addEventListener("click", () => {
+      document.getElementById("contextMenu").style.display = "none";
+    });
+
+    function openEditReservation() {
+      if (!currentReservation) return;
+      const form = document.getElementById("popupForm");
+      form.innerHTML = `
+        <input name="num_players" type="number" placeholder="Players" value="${currentReservation.num_players}" />
+        <input name="start_time" type="datetime-local" value="${new Date(currentReservation.start_time).toISOString().slice(0,16)}" />
+        <input name="duration" type="number" placeholder="Duration (min)" value="${currentReservation.duration}" />
+        <input name="table_assigned" placeholder="Table" value="${currentReservation.table_assigned}" />
+        <button type="submit">Save</button>
+      `;
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const data = {
+          num_players: parseInt(form.num_players.value),
+          start_time: new Date(form.start_time.value).toISOString(),
+          duration: parseInt(form.duration.value),
+          table_assigned: form.table_assigned.value
+        };
+        try {
+          const res = await fetch(`http://localhost:8080/api/reservations/${currentReservation.reservation_id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+          });
+          if (!res.ok) throw new Error("Update failed");
+          showPopup("Reservation updated.");
+          loadReservations();
+        } catch (err) {
+          showPopup(err.message, true);
+        }
+      };
+      showPopup("Edit Reservation", false, true);
+    }
+
+    function confirmDeleteReservation() {
+      if (!currentReservation) return;
+      if (!confirm(`Delete reservation ID ${currentReservation.reservation_id}?`)) return;
+      fetch(`http://localhost:8080/api/reservations/${currentReservation.reservation_id}`, {
+        method: "DELETE"
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Delete failed");
+        showPopup("Reservation deleted.");
+        loadReservations();
+      })
+      .catch(err => showPopup(err.message, true));
+    }
+
+    function assignUserToReservation() {
+      if (!currentReservation) return;
+      const form = document.getElementById("popupForm");
+      form.innerHTML = `
+        <input name="user_id" type="number" placeholder="User ID" />
+        <button type="submit">Assign</button>
+      `;
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const user_id = parseInt(form.user_id.value);
+        try {
+          const res = await fetch(`http://localhost:8080/api/reservation_assignments`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reservation_id: currentReservation.reservation_id, user_id })
+          });
+          if (!res.ok) throw new Error("Assignment failed");
+          showPopup("User assigned to reservation.");
+        } catch (err) {
+          showPopup(err.message, true);
+        }
+      };
+      showPopup("Assign User to Reservation", false, true);
+    }
+
     async function loadReservations() {
       try {
         const res = await fetch('http://localhost:8080/api/reservations');
-
-        if (!res.ok) {
-          const error = await res.json();
-          console.error('API Error:', error);
-          throw new Error(`API error: ${res.status}`);
-        }
-
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-
-        if (!Array.isArray(data)) {
-          throw new Error('Unexpected API response: not an array');
-        }
-
         const tbody = document.getElementById('reservationsBody');
         tbody.innerHTML = '';
+
         data.forEach(r => {
           const row = document.createElement('tr');
           row.innerHTML = `
@@ -63,12 +287,14 @@
             <td>${r.duration} mins</td>
             <td>${r.table_assigned}</td>
           `;
+          row.oncontextmenu = (e) => showContextMenu(e, r);
           tbody.appendChild(row);
         });
       } catch (error) {
         console.error('Failed to load reservations:', error);
         const tbody = document.getElementById('reservationsBody');
         tbody.innerHTML = `<tr><td colspan="5">Failed to load reservations</td></tr>`;
+        showPopup("Failed to load reservations", true);
       }
     }
 
@@ -88,7 +314,43 @@
       rows.forEach(row => tbody.appendChild(row));
     }
 
-    window.onload = loadReservations;
+    window.onload = function () {
+      updateNavBar();
+      loadReservations();
+    };
+
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? match[2] : null;
+    }
+
+    function updateNavBar() {
+      const authLinks = document.getElementById('authLinks');
+      const email = localStorage.getItem('userEmail');
+
+      if (email) {
+        authLinks.innerHTML = `
+        <li><a href="/profile/profile.html">Profile (${email})</a></li>
+          <li><a href="#" onclick="logout()">Logout</a></li>
+        `;
+      } else {
+        authLinks.innerHTML = `
+          <li><a href="/login">Login</a></li>
+          <li><a href="/register">Register</a></li>
+        `;
+      }
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = '/login';
+    }
+
+
+    function logout() {
+      document.cookie = "authToken=; path=/; max-age=0";
+      window.location.href = '/login';
+    }
   </script>
 </body>
 </html>

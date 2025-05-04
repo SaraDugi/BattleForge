@@ -223,3 +223,29 @@ tbody img {
     padding-right: 0.5rem;
   }
 }
+button {
+  background-color: #ffcc00;
+  color: #000;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  margin: 0.25rem;
+}
+
+button:hover {
+  background-color: #e6b800;
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+}

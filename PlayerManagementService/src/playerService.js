@@ -65,23 +65,23 @@ module.exports = {
 
   async CreatePlayer(call, callback) {
     const {
-      firstName,
-      lastName,
+      firstName = '',
+      lastName = '',
       nickname,
       email,
-      accountPassword,
-      mainFaction,
-      score,
-      eloRating,
-      wins,
-      losses,
-      tournamentsParticipated,
-      achievements,
-      profilePic,
-      banner,
-      teamId
+      accountPassword = '',
+      mainFaction = 'Unaligned',
+      score = 0,
+      eloRating = 1000,
+      wins = 0,
+      losses = 0,
+      tournamentsParticipated = 0,
+      achievements = '[]',
+      profilePic = '',
+      banner = '',
+      teamId = 0
     } = call.request;
-
+  
     try {
       const newPlayerId = await Player.create({
         first_name: firstName,
@@ -100,6 +100,7 @@ module.exports = {
         banner,
         team_id: teamId
       });
+  
       logger.info(`CreatePlayer: new player ID=${newPlayerId}`);
       callback(null, { id: newPlayerId });
     } catch (error) {

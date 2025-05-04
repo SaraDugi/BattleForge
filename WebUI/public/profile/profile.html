@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>User Settings | BattleForge</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #f0f0f0;
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+    }
+
+    h1 {
+      color: #ffcc00;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+    }
+
+    input {
+      padding: 0.5rem;
+      background: #1f1f1f;
+      color: #f0f0f0;
+      border: 1px solid #444;
+      border-radius: 5px;
+      width: 300px;
+    }
+
+    button {
+      margin-top: 1.5rem;
+      padding: 0.5rem 1rem;
+      background-color: #ffcc00;
+      color: #1a1a1a;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #e6b800;
+    }
+
+    .back-button {
+      margin-bottom: 1rem;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <a href="/index.html" class="back-button"><button>&larr; Go Back</button></a>
+  <h1>User Settings</h1>
+
+  <form id="settingsForm">
+    <label>Email:
+      <input type="email" id="email" name="email" />
+    </label>
+
+    <label>Nickname:
+      <input type="text" id="nickname" name="nickname" />
+    </label>
+
+    <label>Main Faction:
+      <input type="text" id="mainFaction" name="mainFaction" />
+    </label>
+
+    <label>ELO Rating:
+      <input type="number" id="eloRating" name="eloRating" disabled />
+    </label>
+
+    <label>Wins:
+      <input type="number" id="wins" name="wins" disabled />
+    </label>
+
+    <label>Losses:
+      <input type="number" id="losses" name="losses" disabled />
+    </label>
+
+    <label>Score:
+      <input type="number" id="score" name="score" disabled />
+    </label>
+
+    <button type="submit">Update Profile</button>
+  </form>
+
+  <script>
+    const playerId = localStorage.getItem('playerId');
+
+    async function loadUserData() {
+      if (!playerId) return alert("No player ID found in localStorage.");
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/player/${playerId}`);
+        const result = await res.json();
+
+        if (!result.players || !result.players.length) {
+          throw new Error("User not found.");
+        }
+
+        const user = result.players[0];
+
+        // Store email in case it's needed elsewhere
+        localStorage.setItem('userEmail', user.email || '');
+
+        document.getElementById('email').value = user.email || '';
+        document.getElementById('nickname').value = user.nickname || '';
+        document.getElementById('mainFaction').value = user.mainFaction || '';
+        document.getElementById('eloRating').value = user.eloRating || '';
+        document.getElementById('wins').value = user.wins || '';
+        document.getElementById('losses').value = user.losses || '';
+        document.getElementById('score').value = user.score || '';
+      } catch (err) {
+        alert("Failed to load profile: " + err.message);
+      }
+    }
+
+    document.getElementById('settingsForm').onsubmit = async (e) => {
+      e.preventDefault();
+
+      const updates = {
+        email: document.getElementById('email').value,
+        nickname: document.getElementById('nickname').value,
+        mainFaction: document.getElementById('mainFaction').value
+      };
+
+      if (!playerId) return alert("Player ID not found.");
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/player/${playerId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates)
+        });
+
+        if (!res.ok) throw new Error("Update failed.");
+        alert("Profile updated!");
+      } catch (err) {
+        alert("Update failed: " + err.message);
+      }
+    };
+
+    window.onload = loadUserData;
+  </script>
+</body>
+</html>
