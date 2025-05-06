@@ -112,6 +112,18 @@ services:
       DB_NAME: defaultdb
       JWT_SECRET: your_jwt_secret_key
 
+  frontend:
+    build:
+      context: ./WebUI
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3001:3001"
+    environment:
+      API_GATEWAY: http://web-gateway:8080
+    depends_on:
+      - web-gateway
+
 volumes:
   db1-data:
   db2-data:

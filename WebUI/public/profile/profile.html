@@ -4,15 +4,74 @@
   <meta charset="UTF-8" />
   <title>User Settings | BattleForge</title>
   <style>
+    body, h1, ul, li {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      background-color: #121212;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #1a1a1a;
       color: #f0f0f0;
-      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
       padding: 2rem;
     }
 
     h1 {
+      margin-bottom: 1rem;
       color: #ffcc00;
+    }
+
+    .back-button {
+      margin-bottom: 1.5rem;
+      display: inline-block;
+    }
+
+    .back-button button {
+      padding: 0.5rem 1rem;
+      background-color: #ffcc00;
+      color: #1a1a1a;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .back-button button:hover {
+      background-color: #e6b800;
+    }
+
+    #visuals {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    #banner {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    #profilePic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin-top: -60px;
+      border: 3px solid #ffcc00;
+      object-fit: cover;
+      background-color: #2a2a2a;
+    }
+
+    form {
+      max-width: 400px;
+      margin: 0 auto;
+      background-color: #2a2a2a;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
     }
 
     label {
@@ -26,7 +85,8 @@
       color: #f0f0f0;
       border: 1px solid #444;
       border-radius: 5px;
-      width: 300px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     textarea {
@@ -34,7 +94,7 @@
       resize: vertical;
     }
 
-    button {
+    button[type="submit"] {
       margin-top: 1.5rem;
       padding: 0.5rem 1rem;
       background-color: #ffcc00;
@@ -42,15 +102,11 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      width: 100%;
     }
 
-    button:hover {
+    button[type="submit"]:hover {
       background-color: #e6b800;
-    }
-
-    .back-button {
-      margin-bottom: 1rem;
-      display: inline-block;
     }
   </style>
 </head>
@@ -58,13 +114,22 @@
   <a href="/index.html" class="back-button"><button>&larr; Go Back</button></a>
   <h1>User Settings</h1>
 
+  <div id="visuals">
+    <div id="bannerContainer">
+      <img id="banner" alt="User Banner" />
+    </div>
+    <div id="pfpContainer">
+      <img id="profilePic" alt="Profile Picture" />
+    </div>
+  </div>
+
   <form id="settingsForm">
     <label>Email:
-      <input type="email" id="email" name="email" />
+      <input type="email" id="email" name="email" disabled />
     </label>
 
     <label>Nickname:
-      <input type="text" id="nickname" name="nickname" />
+      <input type="text" id="nickname" name="nickname" disabled />
     </label>
 
     <label>First Name:
@@ -76,7 +141,7 @@
     </label>
 
     <label>Main Faction:
-      <input type="text" id="mainFaction" name="mainFaction" />
+      <input type="text" id="mainFaction" name="mainFaction" disabled />
     </label>
 
     <label>ELO Rating:
@@ -112,64 +177,100 @@
 
   <script>
     const playerId = localStorage.getItem('playerId');
-
+    let isEditing = false;
+    let originalData = {};
+  
     async function loadUserData() {
       if (!playerId) return alert("No player ID found in localStorage.");
-
+  
       try {
         const res = await fetch(`http://localhost:8080/api/player?id=${playerId}`);
         const result = await res.json();
-
+  
         if (!result.players || !result.players.length) {
           throw new Error("User not found.");
         }
-
+  
         const user = result.players[0];
+        originalData = { ...user };
+  
         localStorage.setItem('userEmail', user.email || '');
-
+  
         document.getElementById('email').value = user.email || '';
         document.getElementById('nickname').value = user.nickname || '';
         document.getElementById('firstName').value = user.firstName || '';
         document.getElementById('lastName').value = user.lastName || '';
         document.getElementById('mainFaction').value = user.mainFaction || '';
-        document.getElementById('eloRating').value = user.eloRating || '';
-        document.getElementById('wins').value = user.wins || '';
-        document.getElementById('losses').value = user.losses || '';
-        document.getElementById('score').value = user.score || '';
-        document.getElementById('tournaments').value = user.tournamentsParticipated || '';
+        document.getElementById('eloRating').value = user.eloRating ?? 0;
+        document.getElementById('wins').value = user.wins ?? 0;
+        document.getElementById('losses').value = user.losses ?? 0;
+        document.getElementById('score').value = user.score ?? 0;
+        document.getElementById('tournaments').value = user.tournamentsParticipated ?? 0;
         document.getElementById('achievements').value = user.achievements ? JSON.parse(user.achievements).join(', ') : '';
-        document.getElementById('teamId').value = user.teamId || 0;
+        document.getElementById('teamId').value = user.teamId ?? 0;
+  
+        document.getElementById('profilePic').src = user.profilePic || '';
+        document.getElementById('banner').src = user.banner || '';
       } catch (err) {
         alert("Failed to load profile: " + err.message);
       }
     }
-
+  
     document.getElementById('settingsForm').onsubmit = async (e) => {
       e.preventDefault();
-
-      const updates = {
-        email: document.getElementById('email').value,
-        nickname: document.getElementById('nickname').value,
-        mainFaction: document.getElementById('mainFaction').value
-      };
-
+      const button = document.querySelector('button[type="submit"]');
+  
+      if (!isEditing) {
+        document.getElementById('email').disabled = false;
+        document.getElementById('nickname').disabled = false;
+        document.getElementById('mainFaction').disabled = false;
+        button.textContent = "Save Changes";
+        isEditing = true;
+        return;
+      }
+  
+      const updates = {};
+      const email = document.getElementById('email').value;
+      const nickname = document.getElementById('nickname').value;
+      const mainFaction = document.getElementById('mainFaction').value;
+  
+      if (email !== originalData.email) updates.email = email;
+      if (nickname !== originalData.nickname) updates.nickname = nickname;
+      if (mainFaction !== originalData.mainFaction) updates.mainFaction = mainFaction;
+  
       if (!playerId) return alert("Player ID not found.");
-
+      if (Object.keys(updates).length === 0) {
+        alert("No changes to save.");
+        return;
+      }
+  
       try {
         const res = await fetch(`http://localhost:8080/api/player/${playerId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(updates)
         });
-
-        if (!res.ok) throw new Error("Update failed.");
+  
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(errText || "Update failed.");
+        }
+  
         alert("Profile updated!");
+  
+        document.getElementById('email').disabled = true;
+        document.getElementById('nickname').disabled = true;
+        document.getElementById('mainFaction').disabled = true;
+        button.textContent = "Update Profile";
+        isEditing = false;
+  
+        loadUserData();  
       } catch (err) {
         alert("Update failed: " + err.message);
       }
     };
-
+  
     window.onload = loadUserData;
-  </script>
+  </script>  
 </body>
 </html>
